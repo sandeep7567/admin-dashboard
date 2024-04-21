@@ -31,10 +31,14 @@ const LoginPage = () => {
   const { setUser, logout: logoutFromStore } = useAuthStore();
   const { isAllowed } = usePermission();
 
-  // const {  } = useMutation({
-  //   mutationKey: ["logout"],
-
-  // });
+  const { mutate: logoutMutate } = useMutation({
+    mutationKey: ["logout"],
+    mutationFn: logout,
+    onSuccess: async () => {
+      logoutFromStore();
+      return;
+    },
+  });
 
   const { refetch } = useQuery({
     queryKey: ["self"],
@@ -49,8 +53,7 @@ const LoginPage = () => {
       const { data: selfData } = await refetch();
 
       if (!isAllowed(selfData)) {
-        await logout();
-        logoutFromStore();
+        logoutMutate();
         return;
       }
 
