@@ -1,18 +1,48 @@
-import { Button, Card, Checkbox, Flex, Form, Input, Layout, Space } from "antd";
+import {
+  Alert,
+  Button,
+  Card,
+  Checkbox,
+  Flex,
+  Form,
+  Input,
+  Layout,
+  Space,
+} from "antd";
 import { LockFilled, UserOutlined, LockOutlined } from "@ant-design/icons";
 import Logo from "../../components/icons/Logo";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Credentials } from "../../types";
+import { login, self } from "../../http/api";
+
+const loginUser = async (credentials: Credentials) => {
+  const { data } = await login(credentials);
+  return data;
+};
+
+const getSelf = async () => {
+  const { data } = await self();
+  return data;
+};
 
 const LoginPage = () => {
+  const { data: selfData, refetch } = useQuery({
+    queryKey: ["self"],
+    queryFn: getSelf,
+    enabled: false,
+  });
+
+  const { mutate, error, isError, isPending } = useMutation({
+    mutationKey: ["login"],
+    mutationFn: loginUser,
+    onSuccess: async () => {
+      refetch();
+      console.log(selfData);
+    },
+  });
+
   return (
     <>
-      {/* <h1>Sign in</h1>
-      <input type="text" placeholder="Username" />
-      <input type="password" placeholder="Password" />
-      <button type="button">Login</button>
-      <label htmlFor="remember-me">Remember me</label>
-      <input type="checkbox" id="remember-me" />
-      <a href="forgot-password">Forgot password</a> */}
-
       <Layout
         style={{
           height: "100vh",
@@ -46,16 +76,28 @@ const LoginPage = () => {
             style={{ width: 300 }}
             bordered={false}
           >
-            <Form initialValues={{ remember: true }}>
+            <Form
+              initialValues={{ remember: true }}
+              onFinish={(values) => {
+                mutate({ email: values.email, password: values.password });
+              }}
+            >
+              {isError && (
+                <Alert
+                  style={{ marginBottom: 24 }}
+                  message={error.message}
+                  type="error"
+                />
+              )}
               <Form.Item
-                name={"username"}
-                id="username"
+                name={"email"}
+                id="email"
                 rules={[
                   { required: true, message: "Enter your username" },
                   { type: "email", message: "email is not valid" },
                 ]}
               >
-                <Input prefix={<UserOutlined />} placeholder="Username" />
+                <Input prefix={<UserOutlined />} placeholder="Email" />
               </Form.Item>
               <Form.Item
                 name={"password"}
@@ -87,6 +129,8 @@ const LoginPage = () => {
                   type="primary"
                   htmlType="submit"
                   style={{ width: "100%" }}
+                  disabled={isPending}
+                  loading={isPending}
                 >
                   Login
                 </Button>
