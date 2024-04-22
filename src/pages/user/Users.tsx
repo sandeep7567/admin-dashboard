@@ -1,7 +1,7 @@
-import { Breadcrumb, Space, Table, TableProps } from "antd";
 import { RightOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { Breadcrumb, Space, Table, TableProps } from "antd";
+import { Link } from "react-router-dom";
 import { getUsers } from "../../http/api";
 import { User } from "../../types";
 
