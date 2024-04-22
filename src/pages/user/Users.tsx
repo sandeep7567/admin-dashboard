@@ -1,14 +1,68 @@
-import { Breadcrumb } from "antd";
+import { Breadcrumb, Space, Table, TableProps } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getUsers } from "../../http/api";
+import { User } from "../../types";
+
+const columns: TableProps<User>["columns"] = [
+  {
+    title: "ID",
+    dataIndex: "id",
+    key: "id",
+  },
+  {
+    title: "Name",
+    dataIndex: "name",
+    key: "name",
+    render: (_text: string, record: User) => {
+      return (
+        <div>
+          {record.firstName} {record.lastName}
+        </div>
+      );
+    },
+  },
+  {
+    title: "Email",
+    dataIndex: "email",
+    key: "email",
+  },
+  {
+    title: "Role",
+    dataIndex: "role",
+    key: "role",
+  },
+];
 
 const Users = () => {
+  const {
+    data: users,
+    isError,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      return getUsers().then((res) => res.data);
+    },
+  });
+
   return (
     <>
-      <Breadcrumb
-        separator={<RightOutlined />}
-        items={[{ title: <Link to={"/"}>Dashboard</Link> }, { title: "Users" }]}
-      />
+      <Space direction="vertical" style={{ width: "100%" }} size={"large"}>
+        <Breadcrumb
+          separator={<RightOutlined />}
+          items={[
+            { title: <Link to={"/"}>Dashboard</Link> },
+            { title: "Users" },
+          ]}
+        />
+        {isLoading && <div>Loading...</div>}
+        {isError && <div>{error.message}</div>}
+
+        <Table columns={columns} dataSource={users} loading={isLoading} />
+      </Space>
     </>
   );
 };
