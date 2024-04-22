@@ -4,6 +4,7 @@ import { Breadcrumb, Space, Table, TableProps } from "antd";
 import { Link } from "react-router-dom";
 import { getUsers } from "../../http/api";
 import { User } from "../../types";
+import UsersFilter from "./UsersFilter";
 
 const columns: TableProps<User>["columns"] = [
   {
@@ -60,6 +61,8 @@ const Users = () => {
         />
         {isLoading && <div>Loading...</div>}
         {isError && <div>{error.message}</div>}
+
+        <UsersFilter />
 
         <Table columns={columns} dataSource={users} loading={isLoading} />
       </Space>
