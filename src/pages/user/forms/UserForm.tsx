@@ -11,6 +11,8 @@ const UserForm = () => {
     },
   });
 
+  const selectRole = Form.useWatch("role");
+
   return (
     <Row>
       <Col span={24}>
@@ -112,33 +114,36 @@ const UserForm = () => {
                   </Select>
                 </Form.Item>
               </Col>
-              <Col span={12}>
-                <Form.Item
-                  label="Restaurant"
-                  name="tenantId"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Restaurant is required",
-                    },
-                  ]}
-                >
-                  <Select
-                    size="large"
-                    style={{ width: "100%" }}
-                    allowClear={true}
-                    placeholder="Select restaurant"
+              {selectRole === "manager" && (
+                <Col span={12}>
+                  <Form.Item
+                    label="Restaurant"
+                    name="tenantId"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Restaurant is required",
+                      },
+                    ]}
                   >
-                    {tenants.map((tenant: Tenant) => {
-                      return (
-                        <Select.Option value={tenant.id} key={tenant.id}>
-                          {tenant.name}
-                        </Select.Option>
-                      );
-                    })}
-                  </Select>
-                </Form.Item>
-              </Col>
+                    <Select
+                      size="large"
+                      style={{ width: "100%" }}
+                      allowClear={true}
+                      placeholder="Select restaurant"
+                    >
+                      {!!tenants.length &&
+                        tenants.map((tenant: Tenant) => {
+                          return (
+                            <Select.Option value={tenant.id} key={tenant.id}>
+                              {tenant.name}
+                            </Select.Option>
+                          );
+                        })}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              )}
             </Row>
           </Card>
         </Space>
