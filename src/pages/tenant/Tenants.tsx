@@ -5,9 +5,9 @@ import { Link } from "react-router-dom";
 import { getTenants } from "../../http/api";
 import { Tenant } from "../../types";
 
-import { useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
-import UsersFilter from "../user/UsersFilter";
+import { useState } from "react";
+import TenantsFilter from "./TenantsFilter";
 
 const columns: TableProps<Tenant>["columns"] = [
   {
@@ -54,7 +54,7 @@ const Tenants = () => {
         {isLoading && <div>Loading...</div>}
         {isError && <div>{error.message}</div>}
 
-        <UsersFilter
+        <TenantsFilter
           onFilterChange={(filterName: string, filterValue: string) => {
             console.log(`${filterName}: ${filterValue}`);
           }}
@@ -64,9 +64,9 @@ const Tenants = () => {
             icon={<PlusOutlined />}
             onClick={() => setIsDrawerOpen(true)}
           >
-            Add Breadcrumb
+            Add Restaurant
           </Button>
-        </UsersFilter>
+        </TenantsFilter>
 
         <Table
           rowKey={"id"}
