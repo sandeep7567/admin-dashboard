@@ -1,12 +1,22 @@
 import { RightOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Button, Drawer, Space, Table, TableProps } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Drawer,
+  Form,
+  Space,
+  Table,
+  TableProps,
+  theme,
+} from "antd";
 import { Link } from "react-router-dom";
 import { getUsers } from "../../http/api";
 import { User } from "../../types";
 import UsersFilter from "./UsersFilter";
 import { useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
+import UserForm from "./forms/UserForm";
 
 const columns: TableProps<User>["columns"] = [
   {
@@ -39,6 +49,10 @@ const columns: TableProps<User>["columns"] = [
 ];
 
 const Users = () => {
+  const [form] = Form.useForm();
+  const {
+    token: { colorBgLayout },
+  } = theme.useToken();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const {
     data: users,
@@ -92,6 +106,7 @@ const Users = () => {
           destroyOnClose
           open={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
+          styles={{ body: { backgroundColor: colorBgLayout } }}
           extra={
             <Space>
               <Button>Cancel</Button>
@@ -99,8 +114,9 @@ const Users = () => {
             </Space>
           }
         >
-          <p>Extrsa</p>
-          <p>Extrsa</p>
+          <Form layout="vertical" form={form}>
+            <UserForm />
+          </Form>
         </Drawer>
       </Space>
     </>
