@@ -3,13 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb, Button, Drawer, Space, Table, TableProps } from "antd";
 import { Link } from "react-router-dom";
 import { getTenants } from "../../http/api";
-import { User } from "../../types";
+import { Tenant } from "../../types";
 
 import { useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import UsersFilter from "../user/UsersFilter";
 
-const columns: TableProps<User>["columns"] = [
+const columns: TableProps<Tenant>["columns"] = [
   {
     title: "ID",
     dataIndex: "id",
@@ -64,7 +64,7 @@ const Tenants = () => {
             icon={<PlusOutlined />}
             onClick={() => setIsDrawerOpen(true)}
           >
-            Add User
+            Add Breadcrumb
           </Button>
         </UsersFilter>
 
