@@ -48,7 +48,7 @@ const Tenants = () => {
           separator={<RightOutlined />}
           items={[
             { title: <Link to={"/"}>Dashboard</Link> },
-            { title: "Users" },
+            { title: "Restaurants" },
           ]}
         />
         {isLoading && <div>Loading...</div>}
