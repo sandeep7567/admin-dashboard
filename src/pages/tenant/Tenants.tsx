@@ -1,13 +1,23 @@
 import { RightOutlined } from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
-import { Breadcrumb, Button, Drawer, Space, Table, TableProps } from "antd";
+import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  Breadcrumb,
+  Button,
+  Drawer,
+  Form,
+  Space,
+  Table,
+  TableProps,
+  theme,
+} from "antd";
 import { Link } from "react-router-dom";
-import { getTenants } from "../../http/api";
-import { Tenant } from "../../types";
+import { createTenant, getTenants } from "../../http/api";
+import { CreateTenantData, Tenant } from "../../types";
 
 import { PlusOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import TenantsFilter from "./TenantsFilter";
+import TenantForm from "./forms/TenantForm";
 
 const columns: TableProps<Tenant>["columns"] = [
   {
@@ -28,7 +38,15 @@ const columns: TableProps<Tenant>["columns"] = [
 ];
 
 const Tenants = () => {
+  const [form] = Form.useForm();
+  const queryClient = new QueryClient();
+
+  const {
+    token: { colorBgLayout },
+  } = theme.useToken();
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
   const {
     data: tenants,
     isError,
@@ -40,6 +58,27 @@ const Tenants = () => {
       return getTenants().then((res) => res.data);
     },
   });
+
+  const { mutate: tenantMutate } = useMutation({
+    mutationKey: ["tenant"],
+
+    mutationFn: async (data: CreateTenantData) =>
+      createTenant(data).then((res) => res.data),
+
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ["tenants"] });
+      return;
+    },
+  });
+
+  const onHandleSubmit = async () => {
+    await form.validateFields();
+
+    await tenantMutate(form.getFieldsValue());
+
+    form.resetFields();
+    setIsDrawerOpen(false);
+  };
 
   return (
     <>
@@ -81,15 +120,26 @@ const Tenants = () => {
           destroyOnClose
           open={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
+          styles={{ body: { backgroundColor: colorBgLayout } }}
           extra={
             <Space>
-              <Button>Cancel</Button>
-              <Button type="primary">Submit</Button>
+              <Button
+                onClick={() => {
+                  form.resetFields();
+                  setIsDrawerOpen(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button type="primary" onClick={onHandleSubmit}>
+                Submit
+              </Button>
             </Space>
           }
         >
-          <p>Extrsa</p>
-          <p>Extrsa</p>
+          <Form layout="vertical" form={form}>
+            <TenantForm />
+          </Form>
         </Drawer>
       </Space>
     </>

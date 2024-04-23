@@ -53,15 +53,6 @@ const Users = () => {
 
   const queryClient = new QueryClient();
 
-  const onHandleSubmit = async () => {
-    await form.validateFields();
-
-    await userMutate(form.getFieldsValue());
-
-    form.resetFields();
-    setIsDrawerOpen(false);
-  };
-
   const {
     token: { colorBgLayout },
   } = theme.useToken();
@@ -89,6 +80,15 @@ const Users = () => {
       return;
     },
   });
+
+  const onHandleSubmit = async () => {
+    await form.validateFields();
+
+    await userMutate(form.getFieldsValue());
+
+    form.resetFields();
+    setIsDrawerOpen(false);
+  };
 
   return (
     <>
