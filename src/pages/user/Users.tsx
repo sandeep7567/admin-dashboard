@@ -1,5 +1,5 @@
 import { RightOutlined } from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
+import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import {
   Breadcrumb,
   Button,
@@ -11,8 +11,8 @@ import {
   theme,
 } from "antd";
 import { Link } from "react-router-dom";
-import { getUsers } from "../../http/api";
-import { User } from "../../types";
+import { createUser, getUsers } from "../../http/api";
+import { CreateUserData, User } from "../../types";
 import UsersFilter from "./UsersFilter";
 import { useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
@@ -50,6 +50,18 @@ const columns: TableProps<User>["columns"] = [
 
 const Users = () => {
   const [form] = Form.useForm();
+
+  const queryClient = new QueryClient();
+
+  const onHandleSubmit = async () => {
+    await form.validateFields();
+
+    await userMutate(form.getFieldsValue());
+
+    form.resetFields();
+    setIsDrawerOpen(false);
+  };
+
   const {
     token: { colorBgLayout },
   } = theme.useToken();
@@ -63,6 +75,18 @@ const Users = () => {
     queryKey: ["users"],
     queryFn: async () => {
       return getUsers().then((res) => res.data);
+    },
+  });
+
+  const { mutate: userMutate } = useMutation({
+    mutationKey: ["user"],
+
+    mutationFn: async (data: CreateUserData) =>
+      createUser(data).then((res) => res.data),
+
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      return;
     },
   });
 
@@ -109,8 +133,17 @@ const Users = () => {
           styles={{ body: { backgroundColor: colorBgLayout } }}
           extra={
             <Space>
-              <Button>Cancel</Button>
-              <Button type="primary">Submit</Button>
+              <Button
+                onClick={() => {
+                  form.resetFields();
+                  setIsDrawerOpen(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button type="primary" onClick={onHandleSubmit}>
+                Submit
+              </Button>
             </Space>
           }
         >
