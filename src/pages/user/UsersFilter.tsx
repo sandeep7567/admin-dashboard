@@ -1,4 +1,4 @@
-import { Card, Col, Input, Row, Select } from "antd";
+import { Card, Col, Input, Row } from "antd";
 import React from "react";
 
 type UserFilterProps = {
@@ -18,33 +18,6 @@ const UsersFilter = ({ onFilterChange, children }: UserFilterProps) => {
                 allowClear
                 onChange={(e) => onFilterChange("searchFilter", e.target.value)}
               />
-            </Col>
-            <Col span={8}>
-              <Select
-                style={{ width: "100%" }}
-                allowClear
-                placeholder={"Select role"}
-                onChange={(selectedItem) =>
-                  onFilterChange("roleFilter", selectedItem)
-                }
-              >
-                <Select.Option value="admin">Admin</Select.Option>
-                <Select.Option value="customer">Customer</Select.Option>
-                <Select.Option value="manager">Manager</Select.Option>
-              </Select>
-            </Col>
-            <Col span={8}>
-              <Select
-                style={{ width: "100%" }}
-                allowClear
-                placeholder={"Select status"}
-                onChange={(selectedItem) =>
-                  onFilterChange("statusFilter", selectedItem)
-                }
-              >
-                <Select.Option value="active">Active</Select.Option>
-                <Select.Option value="ban">Ban</Select.Option>
-              </Select>
             </Col>
           </Row>
         </Col>
