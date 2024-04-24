@@ -2,22 +2,19 @@ import { Card, Col, Form, Input, Row, Select } from "antd";
 import React from "react";
 
 type UserFilterProps = {
-  onFilterChange: (filterName: string, filterValue: string) => void;
   children: React.ReactNode;
 };
 
-const UsersFilter = ({ onFilterChange, children }: UserFilterProps) => {
+const UsersFilter = ({ children }: UserFilterProps) => {
   return (
     <Card>
       <Row style={{ justifyContent: "space-between" }}>
         <Col span={16}>
           <Row gutter={[20, 20]}>
             <Col span={8}>
-              <Input.Search
-                placeholder="Search"
-                allowClear
-                onChange={(e) => onFilterChange("searchFilter", e.target.value)}
-              />
+              <Form.Item name={"q"}>
+                <Input.Search placeholder="Search" allowClear />
+              </Form.Item>
             </Col>
             <Col span={8}>
               <Form.Item name="role">
@@ -32,19 +29,18 @@ const UsersFilter = ({ onFilterChange, children }: UserFilterProps) => {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={8}>
+            {/* <Col span={8}>
+            <Form.Item>
               <Select
                 style={{ width: "100%" }}
                 placeholder="Status"
                 allowClear={true}
-                onChange={(selectedItem) =>
-                  onFilterChange("statusFilter", selectedItem)
-                }
               >
                 <Select.Option value="ban">Ban</Select.Option>
                 <Select.Option value="active">Active</Select.Option>
               </Select>
-            </Col>
+              </Form.Item>
+            </Col> */}
           </Row>
         </Col>
         <Col span={8} style={{ display: "flex", justifyContent: "end" }}>

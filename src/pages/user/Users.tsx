@@ -20,7 +20,7 @@ import {
 } from "antd";
 import { Link } from "react-router-dom";
 import { createUser, getUsers } from "../../http/api";
-import { CreateUserData, User } from "../../types";
+import { CreateUserData, FieldData, User } from "../../types";
 import UsersFilter from "./UsersFilter";
 import { useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
@@ -59,6 +59,7 @@ const columns: TableProps<User>["columns"] = [
 
 const Users = () => {
   const [form] = Form.useForm();
+  const [filterForm] = Form.useForm();
 
   const queryClient = useQueryClient();
 
@@ -79,8 +80,12 @@ const Users = () => {
   } = useQuery({
     queryKey: ["users", queryParams],
     queryFn: async () => {
+      const filterParams = Object.entries(queryParams).filter(
+        ([key, value]) => !!value
+      );
+
       const queryString = new URLSearchParams(
-        queryParams as unknown as Record<string, string>
+        filterParams as unknown as Record<string, string>
       ).toString();
 
       return getUsers(queryString).then((res) => res.data);
@@ -109,6 +114,21 @@ const Users = () => {
     setIsDrawerOpen(false);
   };
 
+  const onFilterChange = (changedFields: FieldData[]) => {
+    console.log(changedFields);
+
+    const changedFilteFields = changedFields
+      .map((item) => ({
+        [item.name[0]]: item.value,
+      }))
+      .reduce((acc, item) => ({ ...acc, ...item }), {});
+
+    setQueryParams((prev) => ({
+      ...prev,
+      ...changedFilteFields,
+    }));
+  };
+
   return (
     <>
       <Space direction="vertical" style={{ width: "100%" }} size={"large"}>
@@ -128,19 +148,17 @@ const Users = () => {
           )}
         </Flex>
 
-        <UsersFilter
-          onFilterChange={(filterName: string, filterValue: string) => {
-            console.log(`${filterName}: ${filterValue}`);
-          }}
-        >
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsDrawerOpen(true)}
-          >
-            Add User
-          </Button>
-        </UsersFilter>
+        <Form form={filterForm} onFieldsChange={onFilterChange}>
+          <UsersFilter>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setIsDrawerOpen(true)}
+            >
+              Add User
+            </Button>
+          </UsersFilter>
+        </Form>
 
         <Table
           rowKey={"id"}

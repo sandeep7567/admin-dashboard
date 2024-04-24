@@ -37,3 +37,8 @@ export type QueryParams = {
   currentPage: number;
   perPage: number;
 };
+
+export type FieldData = {
+  name: string[];
+  value?: string;
+};
