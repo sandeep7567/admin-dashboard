@@ -20,7 +20,7 @@ import {
 } from "antd";
 import { Link } from "react-router-dom";
 import { createTenant, getTenants } from "../../http/api";
-import { CreateTenantData, Tenant } from "../../types";
+import { CreateTenantData, FieldData, Tenant } from "../../types";
 
 import { PlusOutlined } from "@ant-design/icons";
 import { useState } from "react";
@@ -48,6 +48,8 @@ const columns: TableProps<Tenant>["columns"] = [
 
 const Tenants = () => {
   const [form] = Form.useForm();
+  const [filterForm] = Form.useForm();
+
   const queryClient = useQueryClient();
 
   const {
@@ -68,8 +70,12 @@ const Tenants = () => {
   } = useQuery({
     queryKey: ["tenants", queryParams],
     queryFn: async () => {
+      const filterParams = Object.entries(queryParams).filter(
+        ([key, value]) => !!value
+      );
+
       const queryString = new URLSearchParams(
-        queryParams as unknown as Record<string, string>
+        filterParams as unknown as Record<string, string>
       ).toString();
 
       return getTenants(queryString).then((res) => res.data);
@@ -98,6 +104,21 @@ const Tenants = () => {
     setIsDrawerOpen(false);
   };
 
+  const onFilterChange = (changedFields: FieldData[]) => {
+    const changedFilterFields = changedFields
+      .map((item) => ({
+        [item.name[0]]: item.value,
+      }))
+      .reduce((acc, item) => ({ ...acc, ...item }), {});
+
+    console.log(changedFilterFields);
+
+    setQueryParams((prev) => ({
+      ...prev,
+      ...changedFilterFields,
+    }));
+  };
+
   return (
     <>
       <Space direction="vertical" style={{ width: "100%" }} size={"large"}>
@@ -117,19 +138,17 @@ const Tenants = () => {
           )}
         </Flex>
 
-        <TenantsFilter
-          onFilterChange={(filterName: string, filterValue: string) => {
-            console.log(`${filterName}: ${filterValue}`);
-          }}
-        >
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsDrawerOpen(true)}
-          >
-            Add Restaurant
-          </Button>
-        </TenantsFilter>
+        <Form form={filterForm} onFieldsChange={onFilterChange}>
+          <TenantsFilter>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setIsDrawerOpen(true)}
+            >
+              Add Restaurant
+            </Button>
+          </TenantsFilter>
+        </Form>
 
         <Table
           rowKey={"id"}
