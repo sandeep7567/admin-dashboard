@@ -109,6 +109,7 @@ const Tenants = () => {
     return debounce((value: string | undefined) => {
       setQueryParams((prev) => ({
         ...prev,
+        currentPage: CURRENT_PAGE,
         q: value,
       }));
     }, DEBOUNCE_TIMER);
@@ -126,6 +127,7 @@ const Tenants = () => {
     } else {
       setQueryParams((prev) => ({
         ...prev,
+        currentPage: CURRENT_PAGE,
         ...changedFilterFields,
       }));
     }

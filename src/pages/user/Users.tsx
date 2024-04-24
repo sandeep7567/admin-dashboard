@@ -127,6 +127,7 @@ const Users = () => {
     return debounce((value: string | undefined) => {
       setQueryParams((prev) => ({
         ...prev,
+        currentPage: CURRENT_PAGE,
         q: value,
       }));
     }, DEBOUNCE_TIMER);
@@ -144,6 +145,7 @@ const Users = () => {
     } else {
       setQueryParams((prev) => ({
         ...prev,
+        currentPage: CURRENT_PAGE,
         ...changedFilterFields,
       }));
     }
