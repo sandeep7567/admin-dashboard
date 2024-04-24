@@ -1,9 +1,9 @@
 import { RightOutlined } from "@ant-design/icons";
 import {
   keepPreviousData,
-  QueryClient,
   useMutation,
   useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
 import {
   Breadcrumb,
@@ -45,7 +45,7 @@ const columns: TableProps<Tenant>["columns"] = [
 
 const Tenants = () => {
   const [form] = Form.useForm();
-  const queryClient = new QueryClient();
+  const queryClient = useQueryClient();
 
   const {
     token: { colorBgLayout },
