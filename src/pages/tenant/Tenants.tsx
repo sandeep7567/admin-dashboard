@@ -1,4 +1,4 @@
-import { RightOutlined } from "@ant-design/icons";
+import { RightOutlined, LoadingOutlined } from "@ant-design/icons";
 import {
   keepPreviousData,
   useMutation,
@@ -9,11 +9,14 @@ import {
   Breadcrumb,
   Button,
   Drawer,
+  Flex,
   Form,
   Space,
+  Spin,
   Table,
   TableProps,
   theme,
+  Typography,
 } from "antd";
 import { Link } from "react-router-dom";
 import { createTenant, getTenants } from "../../http/api";
@@ -60,7 +63,7 @@ const Tenants = () => {
   const {
     data: tenants,
     isError,
-    isLoading,
+    isFetching,
     error,
   } = useQuery({
     queryKey: ["tenants", queryParams],
@@ -95,20 +98,24 @@ const Tenants = () => {
     setIsDrawerOpen(false);
   };
 
-  console.log(tenants);
-
   return (
     <>
       <Space direction="vertical" style={{ width: "100%" }} size={"large"}>
-        <Breadcrumb
-          separator={<RightOutlined />}
-          items={[
-            { title: <Link to={"/"}>Dashboard</Link> },
-            { title: "Restaurants" },
-          ]}
-        />
-        {isLoading && <div>Loading...</div>}
-        {isError && <div>{error.message}</div>}
+        <Flex justify="space-between">
+          <Breadcrumb
+            separator={<RightOutlined />}
+            items={[
+              { title: <Link to={"/"}>Dashboard</Link> },
+              { title: "Restaurants" },
+            ]}
+          />
+          {isFetching && (
+            <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} />} />
+          )}
+          {isError && (
+            <Typography.Text type="danger">{error.message}</Typography.Text>
+          )}
+        </Flex>
 
         <TenantsFilter
           onFilterChange={(filterName: string, filterValue: string) => {
@@ -128,7 +135,7 @@ const Tenants = () => {
           rowKey={"id"}
           columns={columns}
           dataSource={tenants?.data}
-          loading={isLoading}
+          loading={isFetching}
           pagination={{
             current: queryParams.currentPage,
             pageSize: queryParams.perPage,
