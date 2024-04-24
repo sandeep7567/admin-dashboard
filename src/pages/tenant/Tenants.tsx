@@ -23,10 +23,11 @@ import { createTenant, getTenants } from "../../http/api";
 import { CreateTenantData, FieldData, Tenant } from "../../types";
 
 import { PlusOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import TenantsFilter from "./TenantsFilter";
 import TenantForm from "./forms/TenantForm";
 import { CURRENT_PAGE, PER_PAGE } from "../../constants";
+import { debounce } from "lodash";
 
 const columns: TableProps<Tenant>["columns"] = [
   {
@@ -71,7 +72,7 @@ const Tenants = () => {
     queryKey: ["tenants", queryParams],
     queryFn: async () => {
       const filterParams = Object.entries(queryParams).filter(
-        ([key, value]) => !!value
+        ([, value]) => !!value
       );
 
       const queryString = new URLSearchParams(
@@ -104,6 +105,15 @@ const Tenants = () => {
     setIsDrawerOpen(false);
   };
 
+  const debounceQUpdate = useMemo(() => {
+    return debounce((value: string | undefined) => {
+      setQueryParams((prev) => ({
+        ...prev,
+        q: value,
+      }));
+    }, 1000);
+  }, []);
+
   const onFilterChange = (changedFields: FieldData[]) => {
     const changedFilterFields = changedFields
       .map((item) => ({
@@ -111,12 +121,14 @@ const Tenants = () => {
       }))
       .reduce((acc, item) => ({ ...acc, ...item }), {});
 
-    console.log(changedFilterFields);
-
-    setQueryParams((prev) => ({
-      ...prev,
-      ...changedFilterFields,
-    }));
+    if ("q" in changedFilterFields) {
+      debounceQUpdate(changedFilterFields.q);
+    } else {
+      setQueryParams((prev) => ({
+        ...prev,
+        ...changedFilterFields,
+      }));
+    }
   };
 
   return (

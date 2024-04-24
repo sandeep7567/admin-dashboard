@@ -81,7 +81,7 @@ const Users = () => {
     queryKey: ["users", queryParams],
     queryFn: async () => {
       const filterParams = Object.entries(queryParams).filter(
-        ([key, value]) => !!value
+        ([, value]) => !!value
       );
 
       const queryString = new URLSearchParams(
