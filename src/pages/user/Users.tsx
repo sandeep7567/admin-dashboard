@@ -25,7 +25,7 @@ import UsersFilter from "./UsersFilter";
 import { useMemo, useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import UserForm from "./forms/UserForm";
-import { CURRENT_PAGE, PER_PAGE } from "../../constants";
+import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE } from "../../constants";
 import { debounce } from "lodash";
 
 const columns: TableProps<User>["columns"] = [
@@ -129,7 +129,7 @@ const Users = () => {
         ...prev,
         q: value,
       }));
-    }, 1000);
+    }, DEBOUNCE_TIMER);
   }, []);
 
   const onFilterChange = (changedFields: FieldData[]) => {

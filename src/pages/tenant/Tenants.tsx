@@ -26,7 +26,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { useMemo, useState } from "react";
 import TenantsFilter from "./TenantsFilter";
 import TenantForm from "./forms/TenantForm";
-import { CURRENT_PAGE, PER_PAGE } from "../../constants";
+import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE } from "../../constants";
 import { debounce } from "lodash";
 
 const columns: TableProps<Tenant>["columns"] = [
@@ -111,7 +111,7 @@ const Tenants = () => {
         ...prev,
         q: value,
       }));
-    }, 1000);
+    }, DEBOUNCE_TIMER);
   }, []);
 
   const onFilterChange = (changedFields: FieldData[]) => {
