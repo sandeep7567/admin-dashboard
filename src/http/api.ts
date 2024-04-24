@@ -12,7 +12,8 @@ export const logout = async () => await api.post(`/auth/logout`);
 export const getUsers = async (queryString: string) =>
   await api.get(`/users?${queryString}`);
 
-export const getTenants = async () => await api.get(`/tenants`);
+export const getTenants = async (queryString: string) =>
+  await api.get(`/tenants?${queryString}`);
 
 export const createUser = async (user: CreateUserData) =>
   await api.post(`/users`, user);

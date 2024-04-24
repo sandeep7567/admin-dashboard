@@ -1,5 +1,10 @@
 import { RightOutlined } from "@ant-design/icons";
-import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  QueryClient,
+  useMutation,
+  useQuery,
+} from "@tanstack/react-query";
 import {
   Breadcrumb,
   Button,
@@ -18,6 +23,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import TenantsFilter from "./TenantsFilter";
 import TenantForm from "./forms/TenantForm";
+import { CURRENT_PAGE, PER_PAGE } from "../../constants";
 
 const columns: TableProps<Tenant>["columns"] = [
   {
@@ -46,6 +52,10 @@ const Tenants = () => {
   } = theme.useToken();
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [queryParams, setQueryParams] = useState({
+    currentPage: CURRENT_PAGE,
+    perPage: PER_PAGE,
+  });
 
   const {
     data: tenants,
@@ -53,10 +63,15 @@ const Tenants = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["tenants"],
+    queryKey: ["tenants", queryParams],
     queryFn: async () => {
-      return getTenants().then((res) => res.data);
+      const queryString = new URLSearchParams(
+        queryParams as unknown as Record<string, string>
+      ).toString();
+
+      return getTenants(queryString).then((res) => res.data);
     },
+    placeholderData: keepPreviousData,
   });
 
   const { mutate: tenantMutate } = useMutation({
@@ -79,6 +94,8 @@ const Tenants = () => {
     form.resetFields();
     setIsDrawerOpen(false);
   };
+
+  console.log(tenants);
 
   return (
     <>
@@ -110,8 +127,24 @@ const Tenants = () => {
         <Table
           rowKey={"id"}
           columns={columns}
-          dataSource={tenants}
+          dataSource={tenants?.data}
           loading={isLoading}
+          pagination={{
+            current: queryParams.currentPage,
+            pageSize: queryParams.perPage,
+            total: tenants?.total,
+            onChange: (page) => {
+              setQueryParams((prev) => {
+                return {
+                  ...prev,
+                  currentPage: page,
+                };
+              });
+            },
+            showTotal: (total: number, range: number[]) => {
+              return `Showing ${range[0]}-${range[1]} of ${total} items`;
+            },
+          }}
         />
 
         <Drawer
