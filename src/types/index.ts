@@ -32,3 +32,8 @@ export type CreateTenantData = {
   name: string;
   address: string;
 };
+
+export type QueryParams = {
+  currentPage: number;
+  perPage: number;
+};

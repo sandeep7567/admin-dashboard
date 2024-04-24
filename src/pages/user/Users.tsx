@@ -1,5 +1,10 @@
 import { RightOutlined } from "@ant-design/icons";
-import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  QueryClient,
+  useMutation,
+  useQuery,
+} from "@tanstack/react-query";
 import {
   Breadcrumb,
   Button,
@@ -17,6 +22,7 @@ import UsersFilter from "./UsersFilter";
 import { useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import UserForm from "./forms/UserForm";
+import { CURRENT_PAGE, PER_PAGE } from "../../constants";
 
 const columns: TableProps<User>["columns"] = [
   {
@@ -57,16 +63,26 @@ const Users = () => {
     token: { colorBgLayout },
   } = theme.useToken();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [queryParams, setQueryParams] = useState({
+    currentPage: CURRENT_PAGE,
+    perPage: PER_PAGE,
+  });
+
   const {
     data: users,
     isError,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["users"],
+    queryKey: ["users", queryParams],
     queryFn: async () => {
-      return getUsers().then((res) => res.data);
+      const queryString = new URLSearchParams(
+        queryParams as unknown as Record<string, string>
+      ).toString();
+
+      return getUsers(queryString).then((res) => res.data);
     },
+    placeholderData: keepPreviousData,
   });
 
   const { mutate: userMutate } = useMutation({
@@ -120,8 +136,24 @@ const Users = () => {
         <Table
           rowKey={"id"}
           columns={columns}
-          dataSource={users}
+          dataSource={users?.data}
           loading={isLoading}
+          pagination={{
+            current: queryParams.currentPage,
+            pageSize: queryParams.perPage,
+            total: users?.total,
+            onChange: (page) => {
+              setQueryParams((prev) => {
+                return {
+                  ...prev,
+                  currentPage: page,
+                };
+              });
+            },
+            showTotal: (total: number, range: number[]) => {
+              return `Showing ${range[0]}-${range[1]} of ${total} items`;
+            },
+          }}
         />
 
         <Drawer
