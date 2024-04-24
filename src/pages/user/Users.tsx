@@ -22,10 +22,11 @@ import { Link } from "react-router-dom";
 import { createUser, getUsers } from "../../http/api";
 import { CreateUserData, FieldData, User } from "../../types";
 import UsersFilter from "./UsersFilter";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import UserForm from "./forms/UserForm";
 import { CURRENT_PAGE, PER_PAGE } from "../../constants";
+import { debounce } from "lodash";
 
 const columns: TableProps<User>["columns"] = [
   {
@@ -114,6 +115,15 @@ const Users = () => {
     setIsDrawerOpen(false);
   };
 
+  const debounceQUpdate = useMemo(() => {
+    return debounce((value: string | undefined) => {
+      setQueryParams((prev) => ({
+        ...prev,
+        q: value,
+      }));
+    }, 1000);
+  }, []);
+
   const onFilterChange = (changedFields: FieldData[]) => {
     const changedFilterFields = changedFields
       .map((item) => ({
@@ -121,10 +131,14 @@ const Users = () => {
       }))
       .reduce((acc, item) => ({ ...acc, ...item }), {});
 
-    setQueryParams((prev) => ({
-      ...prev,
-      ...changedFilterFields,
-    }));
+    if ("q" in changedFilterFields) {
+      debounceQUpdate(changedFilterFields.q);
+    } else {
+      setQueryParams((prev) => ({
+        ...prev,
+        ...changedFilterFields,
+      }));
+    }
   };
 
   return (
