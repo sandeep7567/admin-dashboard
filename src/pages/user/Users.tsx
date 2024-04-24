@@ -1,4 +1,4 @@
-import { RightOutlined } from "@ant-design/icons";
+import { RightOutlined, LoadingOutlined } from "@ant-design/icons";
 import {
   keepPreviousData,
   useMutation,
@@ -9,11 +9,14 @@ import {
   Breadcrumb,
   Button,
   Drawer,
+  Flex,
   Form,
   Space,
+  Spin,
   Table,
   TableProps,
   theme,
+  Typography,
 } from "antd";
 import { Link } from "react-router-dom";
 import { createUser, getUsers } from "../../http/api";
@@ -71,7 +74,7 @@ const Users = () => {
   const {
     data: users,
     isError,
-    isLoading,
+    isFetching,
     error,
   } = useQuery({
     queryKey: ["users", queryParams],
@@ -109,15 +112,21 @@ const Users = () => {
   return (
     <>
       <Space direction="vertical" style={{ width: "100%" }} size={"large"}>
-        <Breadcrumb
-          separator={<RightOutlined />}
-          items={[
-            { title: <Link to={"/"}>Dashboard</Link> },
-            { title: "Users" },
-          ]}
-        />
-        {isLoading && <div>Loading...</div>}
-        {isError && <div>{error.message}</div>}
+        <Flex justify="space-between">
+          <Breadcrumb
+            separator={<RightOutlined />}
+            items={[
+              { title: <Link to={"/"}>Dashboard</Link> },
+              { title: "Users" },
+            ]}
+          />
+          {isFetching && (
+            <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} />} />
+          )}
+          {isError && (
+            <Typography.Text type="danger">{error.message}</Typography.Text>
+          )}
+        </Flex>
 
         <UsersFilter
           onFilterChange={(filterName: string, filterValue: string) => {
@@ -137,7 +146,7 @@ const Users = () => {
           rowKey={"id"}
           columns={columns}
           dataSource={users?.data}
-          loading={isLoading}
+          loading={isFetching}
           pagination={{
             current: queryParams.currentPage,
             pageSize: queryParams.perPage,
