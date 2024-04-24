@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate, NavLink, Outlet } from "react-router-dom";
+import { Navigate, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Avatar,
   Badge,
@@ -64,6 +64,7 @@ const getMenuItems = (role: string) => {
 
 const Dashboard = () => {
   const { logout: logoutFromStore, user } = useAuthStore();
+  const location = useLocation();
 
   const { mutate: logoutMutate } = useMutation({
     mutationKey: ["logout"],
@@ -80,7 +81,9 @@ const Dashboard = () => {
   } = theme.useToken();
 
   if (user === null) {
-    return <Navigate to={"/auth/login"} replace />;
+    return (
+      <Navigate to={`/auth/login?redirect=${location.pathname}`} replace />
+    );
   }
 
   const items = getMenuItems(user?.role);
