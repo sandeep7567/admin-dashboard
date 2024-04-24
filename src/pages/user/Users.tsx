@@ -115,9 +115,7 @@ const Users = () => {
   };
 
   const onFilterChange = (changedFields: FieldData[]) => {
-    console.log(changedFields);
-
-    const changedFilteFields = changedFields
+    const changedFilterFields = changedFields
       .map((item) => ({
         [item.name[0]]: item.value,
       }))
@@ -125,7 +123,7 @@ const Users = () => {
 
     setQueryParams((prev) => ({
       ...prev,
-      ...changedFilteFields,
+      ...changedFilterFields,
     }));
   };
 
