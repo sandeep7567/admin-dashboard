@@ -3,7 +3,6 @@ import {
   PlusOutlined,
   RightOutlined,
 } from "@ant-design/icons";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Breadcrumb,
   Button,
@@ -23,9 +22,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE } from "../../constants";
 import { useCreateUser } from "../../hooks/user/useCreateUser";
+import { useDeleteUser } from "../../hooks/user/useDeleteUser";
 import { useFetchUsers } from "../../hooks/user/useFetchUsers";
 import { useUpdateUser } from "../../hooks/user/useUpdateUser";
-import { deleteUser } from "../../http/api";
 import { useAuthStore } from "../../store";
 import { FieldData, User } from "../../types";
 import UserForm from "./forms/UserForm";
@@ -75,8 +74,6 @@ const Users = () => {
 
   const { user } = useAuthStore();
 
-  const queryClient = useQueryClient();
-
   const {
     token: { colorBgLayout },
   } = theme.useToken();
@@ -93,6 +90,7 @@ const Users = () => {
   const { users, error, isError, isFetching } = useFetchUsers(queryParams);
   const { userMutate } = useCreateUser();
   const { updateUserMutation } = useUpdateUser(currentEditUser!.id);
+  const { deleteUserMutation } = useDeleteUser();
 
   useEffect(() => {
     if (currentEditUser) {
@@ -103,18 +101,6 @@ const Users = () => {
       });
     }
   }, [currentEditUser, form]);
-
-  const { mutate: deleteUserMutation } = useMutation({
-    mutationKey: ["delete-user"],
-
-    mutationFn: async (id: string | null) =>
-      deleteUser(id as string).then((res) => res.data),
-
-    onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      return;
-    },
-  });
 
   const onHandleSubmit = async () => {
     await form.validateFields();
