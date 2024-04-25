@@ -147,7 +147,8 @@ const Users = () => {
   const { mutate: deleteUserMutation } = useMutation({
     mutationKey: ["delete-user"],
 
-    mutationFn: async (id: string) => deleteUser(id).then((res) => res.data),
+    mutationFn: async (id: string | null) =>
+      deleteUser(id as string).then((res) => res.data),
 
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
@@ -199,7 +200,7 @@ const Users = () => {
   };
 
   const onHandleDelete = async () => {
-    await deleteUserMutation(currentUserDeleteId!);
+    await deleteUserMutation(currentUserDeleteId);
 
     setCurrentUserDeleteId(null);
   };
