@@ -1,5 +1,5 @@
 import { Card, Col, Form, Input, Row, Select, Space } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CURRENT_PAGE, PER_PAGE } from "../../../constants";
 import { useFetchTenants } from "../../../hooks/tenant/useFetchTenants";
 import { QueryParams, Tenant } from "../../../types";
@@ -9,12 +9,18 @@ interface UseFormProps {
 }
 
 const UserForm = ({ isEditMode }: UseFormProps) => {
-  const [queryParams] = useState<QueryParams>({
+  const [queryParams, setQueryParams] = useState<QueryParams>({
     currentPage: CURRENT_PAGE,
     perPage: PER_PAGE,
   });
 
-  const { tenants } = useFetchTenants(queryParams);
+  const { tenants, isSuccess } = useFetchTenants(queryParams);
+
+  useEffect(() => {
+    if (isSuccess && tenants?.total) {
+      setQueryParams((prev) => ({ ...prev, perPage: tenants?.total }));
+    }
+  }, [isSuccess, tenants?.total]);
 
   const selectRole = Form.useWatch("role");
 

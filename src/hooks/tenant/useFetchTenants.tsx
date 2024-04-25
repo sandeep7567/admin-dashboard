@@ -8,6 +8,7 @@ export const useFetchTenants = (queryParams: QueryParams) => {
     isError,
     isFetching,
     error,
+    isSuccess,
   } = useQuery({
     queryKey: ["tenants", queryParams],
     queryFn: async () => {
@@ -24,5 +25,5 @@ export const useFetchTenants = (queryParams: QueryParams) => {
     placeholderData: keepPreviousData,
   });
 
-  return { tenants, isError, isFetching, error };
+  return { tenants, isError, isFetching, error, isSuccess };
 };
