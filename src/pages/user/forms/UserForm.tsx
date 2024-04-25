@@ -1,35 +1,20 @@
 import { Card, Col, Form, Input, Row, Select, Space } from "antd";
-import { getTenants } from "../../../http/api";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Tenant } from "../../../types";
 import { useState } from "react";
 import { CURRENT_PAGE, PER_PAGE } from "../../../constants";
+import { useFetchTenants } from "../../../hooks/tenant/useFetchTenants";
+import { QueryParams, Tenant } from "../../../types";
 
 interface UseFormProps {
   isEditMode: boolean;
 }
 
 const UserForm = ({ isEditMode }: UseFormProps) => {
-  const [queryParams] = useState({
+  const [queryParams] = useState<QueryParams>({
     currentPage: CURRENT_PAGE,
     perPage: PER_PAGE,
   });
 
-  const { data: tenants } = useQuery({
-    queryKey: ["tenants", queryParams],
-    queryFn: async () => {
-      const filterParams = Object.entries(queryParams).filter(
-        ([, value]) => !!value
-      );
-
-      const queryString = new URLSearchParams(
-        filterParams as unknown as Record<string, string>
-      ).toString();
-
-      return getTenants(queryString).then((res) => res.data);
-    },
-    placeholderData: keepPreviousData,
-  });
+  const { tenants } = useFetchTenants(queryParams);
 
   const selectRole = Form.useWatch("role");
 

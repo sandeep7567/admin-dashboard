@@ -1,10 +1,5 @@
-import { RightOutlined, LoadingOutlined } from "@ant-design/icons";
-import {
-  keepPreviousData,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { LoadingOutlined, RightOutlined } from "@ant-design/icons";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Breadcrumb,
   Button,
@@ -20,21 +15,18 @@ import {
   Typography,
 } from "antd";
 import { Link } from "react-router-dom";
-import {
-  createTenant,
-  deleteTenant,
-  getTenants,
-  updateTenant,
-} from "../../http/api";
-import { CreateTenantData, FieldData, Tenant } from "../../types";
+import { createTenant, deleteTenant, updateTenant } from "../../http/api";
+import { CreateTenantData, FieldData, QueryParams, Tenant } from "../../types";
 
 import { PlusOutlined } from "@ant-design/icons";
+import { AxiosError } from "axios";
+import { debounce } from "lodash";
 import { useEffect, useMemo, useState } from "react";
+import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE } from "../../constants";
+
 import TenantsFilter from "./TenantsFilter";
 import TenantForm from "./forms/TenantForm";
-import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE } from "../../constants";
-import { debounce } from "lodash";
-import { AxiosError } from "axios";
+import { useFetchTenants } from "../../hooks/tenant/useFetchTenants";
 
 const columns: TableProps<Tenant>["columns"] = [
   {
@@ -64,6 +56,13 @@ const Tenants = () => {
   const [currentTenantDeleteId, setCurrentTenantDeleteId] = useState<
     null | string
   >(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [queryParams, setQueryParams] = useState<QueryParams>({
+    currentPage: CURRENT_PAGE,
+    perPage: PER_PAGE,
+  });
+
+  const { tenants, isFetching, isError, error } = useFetchTenants(queryParams);
 
   const queryClient = useQueryClient();
 
@@ -71,39 +70,12 @@ const Tenants = () => {
     token: { colorBgLayout },
   } = theme.useToken();
 
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [queryParams, setQueryParams] = useState({
-    currentPage: CURRENT_PAGE,
-    perPage: PER_PAGE,
-  });
-
   useEffect(() => {
     if (currentEditTenant) {
       setIsDrawerOpen(true);
       form.setFieldsValue(currentEditTenant);
     }
   }, [currentEditTenant, form]);
-
-  const {
-    data: tenants,
-    isError,
-    isFetching,
-    error,
-  } = useQuery({
-    queryKey: ["tenants", queryParams],
-    queryFn: async () => {
-      const filterParams = Object.entries(queryParams).filter(
-        ([, value]) => !!value
-      );
-
-      const queryString = new URLSearchParams(
-        filterParams as unknown as Record<string, string>
-      ).toString();
-
-      return getTenants(queryString).then((res) => res.data);
-    },
-    placeholderData: keepPreviousData,
-  });
 
   const { mutate: tenantMutate } = useMutation({
     mutationKey: ["tenant"],
@@ -217,7 +189,7 @@ const Tenants = () => {
             <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} />} />
           )}
           {isError && (
-            <Typography.Text type="danger">{error.message}</Typography.Text>
+            <Typography.Text type="danger">{error?.message}</Typography.Text>
           )}
         </Flex>
 

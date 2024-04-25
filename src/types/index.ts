@@ -37,6 +37,8 @@ export type CreateTenantData = {
 export type QueryParams = {
   currentPage: number;
   perPage: number;
+  q?: string;
+  role?: string;
 };
 
 export type FieldData = {
