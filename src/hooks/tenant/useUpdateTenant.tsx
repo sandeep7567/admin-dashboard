@@ -9,7 +9,7 @@ export const useUpdateTenant = (id: string | undefined) => {
     mutationKey: ["update-tenant"],
 
     mutationFn: async (data: CreateTenantData) =>
-      updateTenant(data, id).then((res) => res.data),
+      updateTenant(data, id!).then((res) => res.data),
 
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["tenants"] });
