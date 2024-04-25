@@ -29,7 +29,7 @@ export const deleteUser = async (id: string) =>
 
 export const updateTenant = async (
   tenant: CreateTenantData,
-  tenantId: string
+  tenantId: string | undefined
 ) => await api.patch(`/tenants/${tenantId}`, tenant);
 
 export const deleteTenant = async (tenantId: string) =>
