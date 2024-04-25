@@ -19,11 +19,11 @@ import {
   Typography,
 } from "antd";
 import { Link } from "react-router-dom";
-import { createTenant, getTenants } from "../../http/api";
+import { createTenant, getTenants, updateTenant } from "../../http/api";
 import { CreateTenantData, FieldData, Tenant } from "../../types";
 
 import { PlusOutlined } from "@ant-design/icons";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import TenantsFilter from "./TenantsFilter";
 import TenantForm from "./forms/TenantForm";
 import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE } from "../../constants";
@@ -70,6 +70,13 @@ const Tenants = () => {
     perPage: PER_PAGE,
   });
 
+  useEffect(() => {
+    if (currentEditTenant) {
+      setIsDrawerOpen(true);
+      form.setFieldsValue(currentEditTenant);
+    }
+  }, [currentEditTenant, form]);
+
   const {
     data: tenants,
     isError,
@@ -103,12 +110,30 @@ const Tenants = () => {
     },
   });
 
+  const { mutate: updateTenantMutation } = useMutation({
+    mutationKey: ["update-tenant"],
+
+    mutationFn: async (data: CreateTenantData) =>
+      updateTenant(data, currentEditTenant!.id).then((res) => res.data),
+
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ["tenants"] });
+      return;
+    },
+  });
+
   const onHandleSubmit = async () => {
     await form.validateFields();
+    const isEditMode = !!currentEditTenant;
 
-    await tenantMutate(form.getFieldsValue());
+    if (isEditMode) {
+      await updateTenantMutation(form.getFieldsValue());
+    } else {
+      await tenantMutate(form.getFieldsValue());
+    }
 
     form.resetFields();
+    setCurrentEditTenant(null);
     setIsDrawerOpen(false);
   };
 
@@ -235,7 +260,11 @@ const Tenants = () => {
           width={720}
           destroyOnClose
           open={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
+          onClose={() => {
+            form.resetFields();
+            setIsDrawerOpen(false);
+            setCurrentEditTenant(null);
+          }}
           styles={{ body: { backgroundColor: colorBgLayout } }}
           extra={
             <Space>

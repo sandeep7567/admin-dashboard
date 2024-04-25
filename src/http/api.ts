@@ -26,3 +26,8 @@ export const updateUser = async (user: CreateUserData, id: string) =>
 
 export const deleteUser = async (id: string) =>
   await api.delete(`/users/${id}`);
+
+export const updateTenant = async (
+  tenant: CreateTenantData,
+  tenantId: string
+) => await api.patch(`/tenants/${tenantId}`, tenant);
