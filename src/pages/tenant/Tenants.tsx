@@ -11,6 +11,7 @@ import {
   Drawer,
   Flex,
   Form,
+  Modal,
   Space,
   Spin,
   Table,
@@ -19,7 +20,12 @@ import {
   Typography,
 } from "antd";
 import { Link } from "react-router-dom";
-import { createTenant, getTenants, updateTenant } from "../../http/api";
+import {
+  createTenant,
+  deleteTenant,
+  getTenants,
+  updateTenant,
+} from "../../http/api";
 import { CreateTenantData, FieldData, Tenant } from "../../types";
 
 import { PlusOutlined } from "@ant-design/icons";
@@ -122,6 +128,18 @@ const Tenants = () => {
     },
   });
 
+  const { mutate: deleteTenantMutation } = useMutation({
+    mutationKey: ["delete-tenant"],
+
+    mutationFn: async (id: string | null) =>
+      deleteTenant(id as string).then((res) => res.data),
+
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ["tenants"] });
+      return;
+    },
+  });
+
   const onHandleSubmit = async () => {
     await form.validateFields();
     const isEditMode = !!currentEditTenant;
@@ -163,6 +181,12 @@ const Tenants = () => {
         ...changedFilterFields,
       }));
     }
+  };
+
+  const onHandleDelete = async () => {
+    await deleteTenantMutation(currentTenantDeleteId);
+
+    setCurrentTenantDeleteId(null);
   };
 
   return (
@@ -254,6 +278,19 @@ const Tenants = () => {
             },
           }}
         />
+
+        <Modal
+          title={<Typography.Text>Delete Modal</Typography.Text>}
+          open={!!currentTenantDeleteId}
+          destroyOnClose
+          okText={"Delete"}
+          onOk={onHandleDelete}
+          onCancel={() => setCurrentTenantDeleteId(null)}
+        >
+          <Flex justify="center">
+            <Typography.Text>Are you sure?</Typography.Text>
+          </Flex>
+        </Modal>
 
         <Drawer
           title={"Create Restaurants"}

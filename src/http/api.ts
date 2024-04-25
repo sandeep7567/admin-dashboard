@@ -31,3 +31,6 @@ export const updateTenant = async (
   tenant: CreateTenantData,
   tenantId: string
 ) => await api.patch(`/tenants/${tenantId}`, tenant);
+
+export const deleteTenant = async (tenantId: string) =>
+  await api.delete(`/tenants/${tenantId}`);
