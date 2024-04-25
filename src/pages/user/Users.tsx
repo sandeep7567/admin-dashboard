@@ -1,4 +1,8 @@
-import { RightOutlined, LoadingOutlined } from "@ant-design/icons";
+import {
+  LoadingOutlined,
+  PlusOutlined,
+  RightOutlined,
+} from "@ant-design/icons";
 import {
   keepPreviousData,
   useMutation,
@@ -19,16 +23,16 @@ import {
   theme,
   Typography,
 } from "antd";
-import { Link } from "react-router-dom";
-import { createUser, deleteUser, getUsers, updateUser } from "../../http/api";
-import { CreateUserData, FieldData, User } from "../../types";
-import UsersFilter from "./UsersFilter";
-import { useEffect, useMemo, useState } from "react";
-import { PlusOutlined } from "@ant-design/icons";
-import UserForm from "./forms/UserForm";
-import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE } from "../../constants";
 import { debounce } from "lodash";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE } from "../../constants";
+import { useCreateUser } from "../../hooks/user/useCreateUser";
+import { deleteUser, getUsers, updateUser } from "../../http/api";
 import { useAuthStore } from "../../store";
+import { CreateUserData, FieldData, User } from "../../types";
+import UserForm from "./forms/UserForm";
+import UsersFilter from "./UsersFilter";
 
 const columns: TableProps<User>["columns"] = [
   {
@@ -89,6 +93,8 @@ const Users = () => {
     null
   );
 
+  const { userMutate } = useCreateUser();
+
   useEffect(() => {
     if (currentEditUser) {
       setIsDrawerOpen(true);
@@ -118,18 +124,6 @@ const Users = () => {
       return getUsers(queryString).then((res) => res.data);
     },
     placeholderData: keepPreviousData,
-  });
-
-  const { mutate: userMutate } = useMutation({
-    mutationKey: ["user"],
-
-    mutationFn: async (data: CreateUserData) =>
-      createUser(data).then((res) => res.data),
-
-    onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      return;
-    },
   });
 
   const { mutate: updateUserMutation } = useMutation({
