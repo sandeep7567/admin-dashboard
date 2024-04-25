@@ -3,12 +3,7 @@ import {
   PlusOutlined,
   RightOutlined,
 } from "@ant-design/icons";
-import {
-  keepPreviousData,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Breadcrumb,
   Button,
@@ -28,7 +23,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE } from "../../constants";
 import { useCreateUser } from "../../hooks/user/useCreateUser";
-import { deleteUser, getUsers, updateUser } from "../../http/api";
+import { useFetchUsers } from "../../hooks/user/useFetchUsers";
+import { deleteUser, updateUser } from "../../http/api";
 import { useAuthStore } from "../../store";
 import { CreateUserData, FieldData, User } from "../../types";
 import UserForm from "./forms/UserForm";
@@ -94,6 +90,7 @@ const Users = () => {
   );
 
   const { userMutate } = useCreateUser();
+  const { users, error, isError, isFetching } = useFetchUsers(queryParams);
 
   useEffect(() => {
     if (currentEditUser) {
@@ -104,27 +101,6 @@ const Users = () => {
       });
     }
   }, [currentEditUser, form]);
-
-  const {
-    data: users,
-    isError,
-    isFetching,
-    error,
-  } = useQuery({
-    queryKey: ["users", queryParams],
-    queryFn: async () => {
-      const filterParams = Object.entries(queryParams).filter(
-        ([, value]) => !!value
-      );
-
-      const queryString = new URLSearchParams(
-        filterParams as unknown as Record<string, string>
-      ).toString();
-
-      return getUsers(queryString).then((res) => res.data);
-    },
-    placeholderData: keepPreviousData,
-  });
 
   const { mutate: updateUserMutation } = useMutation({
     mutationKey: ["update-user"],
@@ -214,7 +190,7 @@ const Users = () => {
             <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} />} />
           )}
           {isError && (
-            <Typography.Text type="danger">{error.message}</Typography.Text>
+            <Typography.Text type="danger">{error?.message}</Typography.Text>
           )}
         </Flex>
 
