@@ -20,3 +20,9 @@ export const createUser = async (user: CreateUserData) =>
 
 export const createTenant = async (tenant: CreateTenantData) =>
   await api.post(`/tenants`, tenant);
+
+export const updateUser = async (user: CreateUserData, id: string) =>
+  await api.patch(`/users/${id}`, user);
+
+export const deleteUser = async (id: string) =>
+  await api.delete(`/users/${id}`);

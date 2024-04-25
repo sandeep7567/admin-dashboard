@@ -11,6 +11,7 @@ import {
   Drawer,
   Flex,
   Form,
+  Modal,
   Space,
   Spin,
   Table,
@@ -19,14 +20,15 @@ import {
   Typography,
 } from "antd";
 import { Link } from "react-router-dom";
-import { createUser, getUsers } from "../../http/api";
+import { createUser, deleteUser, getUsers, updateUser } from "../../http/api";
 import { CreateUserData, FieldData, User } from "../../types";
 import UsersFilter from "./UsersFilter";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import UserForm from "./forms/UserForm";
 import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE } from "../../constants";
 import { debounce } from "lodash";
+import { useAuthStore } from "../../store";
 
 const columns: TableProps<User>["columns"] = [
   {
@@ -70,6 +72,8 @@ const Users = () => {
   const [form] = Form.useForm();
   const [filterForm] = Form.useForm();
 
+  const { user } = useAuthStore();
+
   const queryClient = useQueryClient();
 
   const {
@@ -80,6 +84,20 @@ const Users = () => {
     currentPage: CURRENT_PAGE,
     perPage: PER_PAGE,
   });
+  const [currentEditUser, setCurrentEditUser] = useState<null | User>(null);
+  const [currentUserDeleteId, setCurrentUserDeleteId] = useState<null | string>(
+    null
+  );
+
+  useEffect(() => {
+    if (currentEditUser) {
+      setIsDrawerOpen(true);
+      form.setFieldsValue({
+        ...currentEditUser,
+        tenantId: currentEditUser.tenant?.id,
+      });
+    }
+  }, [currentEditUser, form]);
 
   const {
     data: users,
@@ -114,12 +132,41 @@ const Users = () => {
     },
   });
 
+  const { mutate: updateUserMutation } = useMutation({
+    mutationKey: ["update-user"],
+
+    mutationFn: async (data: CreateUserData) =>
+      updateUser(data, currentEditUser!.id).then((res) => res.data),
+
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      return;
+    },
+  });
+
+  const { mutate: deleteUserMutation } = useMutation({
+    mutationKey: ["delete-user"],
+
+    mutationFn: async (id: string) => deleteUser(id).then((res) => res.data),
+
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      return;
+    },
+  });
+
   const onHandleSubmit = async () => {
     await form.validateFields();
+    const isEditMode = !!currentEditUser;
 
-    await userMutate(form.getFieldsValue());
+    if (isEditMode) {
+      await updateUserMutation(form.getFieldsValue());
+    } else {
+      await userMutate(form.getFieldsValue());
+    }
 
     form.resetFields();
+    setCurrentEditUser(null);
     setIsDrawerOpen(false);
   };
 
@@ -151,6 +198,12 @@ const Users = () => {
     }
   };
 
+  const onHandleDelete = async () => {
+    await deleteUserMutation(currentUserDeleteId!);
+
+    setCurrentUserDeleteId(null);
+  };
+
   return (
     <>
       <Space direction="vertical" style={{ width: "100%" }} size={"large"}>
@@ -175,7 +228,10 @@ const Users = () => {
             <Button
               type="primary"
               icon={<PlusOutlined />}
-              onClick={() => setIsDrawerOpen(true)}
+              onClick={() => {
+                setIsDrawerOpen(true);
+                form.resetFields();
+              }}
             >
               Add User
             </Button>
@@ -184,7 +240,53 @@ const Users = () => {
 
         <Table
           rowKey={"id"}
-          columns={columns}
+          columns={[
+            ...columns,
+            {
+              title: "Action",
+              dataIndex: "action",
+              key: "action",
+
+              render: (_text: string, record: User) => {
+                return (
+                  <Space>
+                    <Button
+                      style={{
+                        padding: 0,
+                        visibility: `${
+                          record.id.toString() === user?.id.toString()
+                            ? "hidden"
+                            : "visible"
+                        }`,
+                      }}
+                      type="link"
+                      onClick={() => {
+                        setCurrentEditUser(record);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      style={{
+                        padding: 0,
+                        visibility: `${
+                          record.id.toString() === user?.id.toString()
+                            ? "hidden"
+                            : "visible"
+                        }`,
+                      }}
+                      type="link"
+                      onClick={() => {
+                        setCurrentUserDeleteId(record.id);
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </Space>
+                );
+              },
+            },
+          ]}
           dataSource={users?.data}
           loading={isFetching}
           pagination={{
@@ -204,13 +306,28 @@ const Users = () => {
             },
           }}
         />
+        <Modal
+          title={<Typography.Text>Delete Modal</Typography.Text>}
+          open={!!currentUserDeleteId}
+          destroyOnClose
+          okText={"Delete"}
+          onOk={onHandleDelete}
+          onCancel={() => setCurrentUserDeleteId(null)}
+        >
+          <Flex justify="center">
+            <Typography.Text>Are you sure?</Typography.Text>
+          </Flex>
+        </Modal>
 
         <Drawer
           title={"Create user"}
           width={720}
           destroyOnClose
           open={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
+          onClose={() => {
+            setIsDrawerOpen(false);
+            setCurrentEditUser(null);
+          }}
           styles={{ body: { backgroundColor: colorBgLayout } }}
           extra={
             <Space>
@@ -218,6 +335,7 @@ const Users = () => {
                 onClick={() => {
                   form.resetFields();
                   setIsDrawerOpen(false);
+                  setCurrentEditUser(null);
                 }}
               >
                 Cancel
@@ -229,7 +347,7 @@ const Users = () => {
           }
         >
           <Form layout="vertical" form={form}>
-            <UserForm />
+            <UserForm isEditMode={!!currentEditUser} />
           </Form>
         </Drawer>
       </Space>

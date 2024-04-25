@@ -3,11 +3,15 @@ import { getTenants } from "../../../http/api";
 import { useQuery } from "@tanstack/react-query";
 import { Tenant } from "../../../types";
 
-const UserForm = () => {
+interface UseFormProps {
+  isEditMode: boolean;
+}
+
+const UserForm = ({ isEditMode }: UseFormProps) => {
   const { data: tenants } = useQuery({
     queryKey: ["tenants"],
     queryFn: async () => {
-      return getTenants().then((res) => res.data);
+      return getTenants(`perPage=100&currentPage=1`).then((res) => res?.data);
     },
   });
 
@@ -68,27 +72,29 @@ const UserForm = () => {
             </Row>
           </Card>
 
-          <Card title={"Security info"}>
-            <Row gutter={20}>
-              <Col span={12}>
-                <Form.Item
-                  label="Password"
-                  name={"password"}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Password must be provided",
-                    },
-                  ]}
-                >
-                  <Input.Password
-                    placeholder="Enter your password"
-                    size="large"
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
-          </Card>
+          {!isEditMode && (
+            <Card title={"Security info"}>
+              <Row gutter={20}>
+                <Col span={12}>
+                  <Form.Item
+                    label="Password"
+                    name={"password"}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Password must be provided",
+                      },
+                    ]}
+                  >
+                    <Input.Password
+                      placeholder="Enter your password"
+                      size="large"
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </Card>
+          )}
 
           <Card title={"Roles"}>
             <Row gutter={20}>
@@ -99,11 +105,12 @@ const UserForm = () => {
                   rules={[
                     {
                       required: true,
-                      message: "Select Role",
+                      message: "Role is required",
                     },
                   ]}
                 >
                   <Select
+                    id="selectBoxInUserForm"
                     size="large"
                     style={{ width: "100%" }}
                     allowClear={true}
@@ -132,8 +139,8 @@ const UserForm = () => {
                       allowClear={true}
                       placeholder="Select restaurant"
                     >
-                      {!!tenants.length &&
-                        tenants.map((tenant: Tenant) => {
+                      {!!tenants?.data.length &&
+                        tenants?.data.map((tenant: Tenant) => {
                           return (
                             <Select.Option value={tenant.id} key={tenant.id}>
                               {tenant.name}
