@@ -34,6 +34,7 @@ import TenantsFilter from "./TenantsFilter";
 import TenantForm from "./forms/TenantForm";
 import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE } from "../../constants";
 import { debounce } from "lodash";
+import { AxiosError } from "axios";
 
 const columns: TableProps<Tenant>["columns"] = [
   {
@@ -136,6 +137,18 @@ const Tenants = () => {
 
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["tenants"] });
+      return;
+    },
+    onError: async (err) => {
+      if (err instanceof AxiosError) {
+        err?.response?.status === 500 &&
+          alert(
+            "Cannot delete this tenant. Delete all associated users first." +
+              err
+          );
+      } else {
+        console.log("Please try again after some time", err);
+      }
       return;
     },
   });
