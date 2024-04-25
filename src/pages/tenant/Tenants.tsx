@@ -15,7 +15,7 @@ import {
   Typography,
 } from "antd";
 import { Link } from "react-router-dom";
-import { createTenant, deleteTenant, updateTenant } from "../../http/api";
+import { deleteTenant, updateTenant } from "../../http/api";
 import { CreateTenantData, FieldData, QueryParams, Tenant } from "../../types";
 
 import { PlusOutlined } from "@ant-design/icons";
@@ -24,9 +24,10 @@ import { debounce } from "lodash";
 import { useEffect, useMemo, useState } from "react";
 import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE } from "../../constants";
 
+import { useFetchTenants } from "../../hooks/tenant/useFetchTenants";
 import TenantsFilter from "./TenantsFilter";
 import TenantForm from "./forms/TenantForm";
-import { useFetchTenants } from "../../hooks/tenant/useFetchTenants";
+import { useCreateTenant } from "../../hooks/tenant/useCreateTenant";
 
 const columns: TableProps<Tenant>["columns"] = [
   {
@@ -63,6 +64,7 @@ const Tenants = () => {
   });
 
   const { tenants, isFetching, isError, error } = useFetchTenants(queryParams);
+  const { tenantMutate } = useCreateTenant();
 
   const queryClient = useQueryClient();
 
@@ -76,18 +78,6 @@ const Tenants = () => {
       form.setFieldsValue(currentEditTenant);
     }
   }, [currentEditTenant, form]);
-
-  const { mutate: tenantMutate } = useMutation({
-    mutationKey: ["tenant"],
-
-    mutationFn: async (data: CreateTenantData) =>
-      createTenant(data).then((res) => res.data),
-
-    onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ["tenants"] });
-      return;
-    },
-  });
 
   const { mutate: updateTenantMutation } = useMutation({
     mutationKey: ["update-tenant"],
