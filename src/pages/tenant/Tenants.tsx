@@ -51,6 +51,13 @@ const Tenants = () => {
   const [form] = Form.useForm();
   const [filterForm] = Form.useForm();
 
+  const [currentEditTenant, setCurrentEditTenant] = useState<null | Tenant>(
+    null
+  );
+  const [currentTenantDeleteId, setCurrentTenantDeleteId] = useState<
+    null | string
+  >(null);
+
   const queryClient = useQueryClient();
 
   const {
@@ -166,7 +173,43 @@ const Tenants = () => {
 
         <Table
           rowKey={"id"}
-          columns={columns}
+          columns={[
+            ...columns,
+            {
+              title: "Action",
+              dataIndex: "action",
+              key: "action",
+
+              render: (_text: string, record: Tenant) => {
+                return (
+                  <Space>
+                    <Button
+                      style={{
+                        padding: 0,
+                      }}
+                      type="link"
+                      onClick={() => {
+                        setCurrentEditTenant(record);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      style={{
+                        padding: 0,
+                      }}
+                      type="link"
+                      onClick={() => {
+                        setCurrentTenantDeleteId(record.id);
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </Space>
+                );
+              },
+            },
+          ]}
           dataSource={tenants?.data}
           loading={isFetching}
           pagination={{
