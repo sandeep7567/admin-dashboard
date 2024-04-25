@@ -24,9 +24,10 @@ import { Link } from "react-router-dom";
 import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE } from "../../constants";
 import { useCreateUser } from "../../hooks/user/useCreateUser";
 import { useFetchUsers } from "../../hooks/user/useFetchUsers";
-import { deleteUser, updateUser } from "../../http/api";
+import { useUpdateUser } from "../../hooks/user/useUpdateUser";
+import { deleteUser } from "../../http/api";
 import { useAuthStore } from "../../store";
-import { CreateUserData, FieldData, User } from "../../types";
+import { FieldData, User } from "../../types";
 import UserForm from "./forms/UserForm";
 import UsersFilter from "./UsersFilter";
 
@@ -89,8 +90,9 @@ const Users = () => {
     null
   );
 
-  const { userMutate } = useCreateUser();
   const { users, error, isError, isFetching } = useFetchUsers(queryParams);
+  const { userMutate } = useCreateUser();
+  const { updateUserMutation } = useUpdateUser(currentEditUser!.id);
 
   useEffect(() => {
     if (currentEditUser) {
@@ -101,18 +103,6 @@ const Users = () => {
       });
     }
   }, [currentEditUser, form]);
-
-  const { mutate: updateUserMutation } = useMutation({
-    mutationKey: ["update-user"],
-
-    mutationFn: async (data: CreateUserData) =>
-      updateUser(data, currentEditUser!.id).then((res) => res.data),
-
-    onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      return;
-    },
-  });
 
   const { mutate: deleteUserMutation } = useMutation({
     mutationKey: ["delete-user"],
