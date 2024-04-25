@@ -89,7 +89,7 @@ const Users = () => {
 
   const { users, error, isError, isFetching } = useFetchUsers(queryParams);
   const { userMutate } = useCreateUser();
-  const { updateUserMutation } = useUpdateUser(currentEditUser!.id);
+  const { updateUserMutation } = useUpdateUser(currentEditUser?.id);
   const { deleteUserMutation } = useDeleteUser();
 
   useEffect(() => {
