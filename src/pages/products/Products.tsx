@@ -1,4 +1,8 @@
-import { PlusOutlined, RightOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  RightOutlined,
+  LoadingOutlined,
+} from "@ant-design/icons";
 import {
   Breadcrumb,
   Button,
@@ -8,6 +12,7 @@ import {
   Image,
   Modal,
   Space,
+  Spin,
   Table,
   TableProps,
   Tag,
@@ -15,12 +20,13 @@ import {
   Typography,
 } from "antd";
 import { Link } from "react-router-dom";
-import { Product } from "../../types";
+import { FieldData, Product, QueryParams } from "../../types";
 import ProductsFilter from "./ProductsFilter";
 import { useFetchProducts } from "../../hooks/product/useFetchProducts";
-import { CURRENT_PAGE, PER_PAGE } from "../../constants";
-import { useState } from "react";
+import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE } from "../../constants";
+import { useMemo, useState } from "react";
 import { format } from "date-fns";
+import { debounce } from "lodash";
 
 const columns: TableProps<Product>["columns"] = [
   {
@@ -72,12 +78,44 @@ const columns: TableProps<Product>["columns"] = [
 ];
 
 const Products = () => {
-  const [queryParams, setQueryParams] = useState({
+  const [filterForm] = Form.useForm();
+
+  const [queryParams, setQueryParams] = useState<QueryParams>({
     currentPage: CURRENT_PAGE,
     perPage: PER_PAGE,
+    isPublish: true,
   });
 
-  const { products } = useFetchProducts(queryParams);
+  const { products, isFetching, error, isError } =
+    useFetchProducts(queryParams);
+
+  const debounceQUpdate = useMemo(() => {
+    return debounce((value: string | undefined) => {
+      setQueryParams((prev) => ({
+        ...prev,
+        currentPage: CURRENT_PAGE,
+        q: value,
+      }));
+    }, DEBOUNCE_TIMER);
+  }, []);
+
+  const onFilterChange = (changedFields: FieldData[]) => {
+    const changedFilterFields = changedFields
+      .map((item) => ({
+        [item.name[0]]: item.value,
+      }))
+      .reduce((acc, item) => ({ ...acc, ...item }), {});
+
+    if ("q" in changedFilterFields) {
+      debounceQUpdate(changedFilterFields.q);
+    } else {
+      setQueryParams((prev) => ({
+        ...prev,
+        currentPage: CURRENT_PAGE,
+        ...changedFilterFields,
+      }));
+    }
+  };
 
   const {
     token: { colorBgLayout },
@@ -93,9 +131,15 @@ const Products = () => {
               { title: "Users" },
             ]}
           />
+          {isFetching && (
+            <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} />} />
+          )}
+          {isError && (
+            <Typography.Text type="danger">{error?.message}</Typography.Text>
+          )}
         </Flex>
 
-        <Form>
+        <Form form={filterForm} onFieldsChange={onFilterChange}>
           <ProductsFilter>
             <Button type="primary" icon={<PlusOutlined />} onClick={() => {}}>
               Add Products

@@ -39,6 +39,7 @@ export type QueryParams = {
   perPage: number;
   q?: string;
   role?: string;
+  isPublish?: boolean;
 };
 
 export type FieldData = {
