@@ -39,3 +39,5 @@ export const deleteTenant = async (tenantId: string) =>
   await api.delete(`${AUTH_SERVICE}/tenants/${tenantId}`);
 
 // Catalog service
+export const getCategories = async () =>
+  await api.get(`${CATALOG_SERVICE}/categories`);

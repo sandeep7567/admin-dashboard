@@ -9,13 +9,31 @@ import {
   Switch,
   Typography,
 } from "antd";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useFetchTenants } from "../../hooks/tenant/useFetchTenants";
+import { CURRENT_PAGE, PER_PAGE } from "../../constants";
+import { Category, QueryParams, Tenant } from "../../types";
+import { useFetchCategories } from "../../hooks/category/useFetchCategories";
 
 type UserFilterProps = {
   children: React.ReactNode;
 };
 
 const ProductsFilter = ({ children }: UserFilterProps) => {
+  const [queryParams, setQueryParams] = useState<QueryParams>({
+    currentPage: CURRENT_PAGE,
+    perPage: PER_PAGE,
+  });
+
+  const { tenants, isSuccess } = useFetchTenants(queryParams);
+  const { categories } = useFetchCategories();
+
+  useEffect(() => {
+    if (isSuccess && tenants?.total) {
+      setQueryParams((prev) => ({ ...prev, perPage: tenants?.total }));
+    }
+  }, [isSuccess, tenants?.total]);
+
   return (
     <Card styles={{ body: { paddingBottom: 0 } }}>
       <Row style={{ justifyContent: "space-between" }}>
@@ -33,20 +51,30 @@ const ProductsFilter = ({ children }: UserFilterProps) => {
                   allowClear={true}
                   placeholder="Select Category"
                 >
-                  <Select.Option value="pizza">Pizza</Select.Option>
-                  <Select.Option value="beverages">Beverages</Select.Option>
+                  {categories?.map((category: Category) => {
+                    return (
+                      <Select.Option key={category._id} value={category._id}>
+                        {category.name}
+                      </Select.Option>
+                    );
+                  })}
                 </Select>
               </Form.Item>
             </Col>
             <Col span={6}>
-              <Form.Item name="tenant">
+              <Form.Item name="restaurant">
                 <Select
                   style={{ width: "100%" }}
                   allowClear={true}
                   placeholder="Select Restaurant"
                 >
-                  <Select.Option value="pizza">Pizza hub</Select.Option>
-                  <Select.Option value="softy">Softy corn</Select.Option>
+                  {tenants?.data.map((tenant: Tenant) => {
+                    return (
+                      <Select.Option key={tenant.id} value={tenant.id}>
+                        {tenant.name}
+                      </Select.Option>
+                    );
+                  })}
                 </Select>
               </Form.Item>
             </Col>
