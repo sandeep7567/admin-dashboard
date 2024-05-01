@@ -11,15 +11,18 @@ import {
 } from "antd";
 import React, { useEffect, useState } from "react";
 import { useFetchTenants } from "../../hooks/tenant/useFetchTenants";
-import { CURRENT_PAGE, PER_PAGE } from "../../constants";
+import { CURRENT_PAGE, PER_PAGE, ROLES } from "../../constants";
 import { Category, QueryParams, Tenant } from "../../types";
 import { useFetchCategories } from "../../hooks/category/useFetchCategories";
+import { useAuthStore } from "../../store";
 
 type UserFilterProps = {
   children: React.ReactNode;
 };
 
 const ProductsFilter = ({ children }: UserFilterProps) => {
+  const { user } = useAuthStore((state) => state);
+
   const [queryParams, setQueryParams] = useState<QueryParams>({
     currentPage: CURRENT_PAGE,
     perPage: PER_PAGE,
@@ -61,23 +64,25 @@ const ProductsFilter = ({ children }: UserFilterProps) => {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={6}>
-              <Form.Item name="tenantId">
-                <Select
-                  style={{ width: "100%" }}
-                  allowClear={true}
-                  placeholder="Select Restaurant"
-                >
-                  {tenants?.data.map((tenant: Tenant) => {
-                    return (
-                      <Select.Option key={tenant.id} value={tenant.id}>
-                        {tenant.name}
-                      </Select.Option>
-                    );
-                  })}
-                </Select>
-              </Form.Item>
-            </Col>
+            {user?.role === ROLES.ADMIN && (
+              <Col span={6}>
+                <Form.Item name="tenantId">
+                  <Select
+                    style={{ width: "100%" }}
+                    allowClear={true}
+                    placeholder="Select Restaurant"
+                  >
+                    {tenants?.data.map((tenant: Tenant) => {
+                      return (
+                        <Select.Option key={tenant.id} value={tenant.id}>
+                          {tenant.name}
+                        </Select.Option>
+                      );
+                    })}
+                  </Select>
+                </Form.Item>
+              </Col>
+            )}
 
             <Col span={6}>
               <Space>

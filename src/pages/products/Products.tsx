@@ -23,10 +23,12 @@ import { Link } from "react-router-dom";
 import { FieldData, Product, QueryParams } from "../../types";
 import ProductsFilter from "./ProductsFilter";
 import { useFetchProducts } from "../../hooks/product/useFetchProducts";
-import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE } from "../../constants";
+import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE, ROLES } from "../../constants";
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { debounce } from "lodash";
+import { useAuthStore } from "../../store";
+import ProductForm from "./forms/ProductForm";
 
 const columns: TableProps<Product>["columns"] = [
   {
@@ -78,12 +80,17 @@ const columns: TableProps<Product>["columns"] = [
 ];
 
 const Products = () => {
+  const { user } = useAuthStore((state) => state);
+
+  const [form] = Form.useForm();
   const [filterForm] = Form.useForm();
 
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [queryParams, setQueryParams] = useState<QueryParams>({
     currentPage: CURRENT_PAGE,
     perPage: PER_PAGE,
     isPublish: true,
+    tenantId: user?.role === ROLES.MANAGER ? user?.tenant?.id : undefined,
   });
 
   const { products, isFetching, error, isError } =
@@ -120,6 +127,11 @@ const Products = () => {
   const {
     token: { colorBgLayout },
   } = theme.useToken();
+
+  const onHandleSubmit = () => {
+    console.log("submitting...");
+  };
+
   return (
     <>
       <Space direction="vertical" style={{ width: "100%" }} size={"large"}>
@@ -141,8 +153,14 @@ const Products = () => {
 
         <Form form={filterForm} onFieldsChange={onFilterChange}>
           <ProductsFilter>
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => {}}>
-              Add Products
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setIsDrawerOpen(true);
+              }}
+            >
+              Add Product
             </Button>
           </ProductsFilter>
         </Form>
@@ -203,30 +221,34 @@ const Products = () => {
         </Modal>
 
         <Drawer
-          title={"Create user"}
+          title={"Add Product"}
           width={720}
           destroyOnClose
-          open={false}
-          onClose={() => {}}
+          open={isDrawerOpen}
+          onClose={() => {
+            form.resetFields();
+            setIsDrawerOpen(false);
+          }}
           styles={{ body: { backgroundColor: colorBgLayout } }}
           extra={
             <Space>
               <Button
                 onClick={() => {
-                  // form.resetFields();
-                  // setIsDrawerOpen(false);
-                  // setCurrentEditUser(null);
+                  form.resetFields();
+                  setIsDrawerOpen(false);
                 }}
               >
                 Cancel
               </Button>
-              <Button type="primary" onClick={() => {}}>
+              <Button type="primary" onClick={onHandleSubmit}>
                 Submit
               </Button>
             </Space>
           }
         >
-          <Form layout="vertical">Product form</Form>
+          <Form layout="vertical" form={form}>
+            <ProductForm />
+          </Form>
         </Drawer>
       </Space>
     </>

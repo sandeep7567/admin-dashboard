@@ -40,6 +40,7 @@ export type QueryParams = {
   q?: string;
   role?: string;
   isPublish?: boolean;
+  tenantId?: number;
 };
 
 export type FieldData = {
@@ -47,9 +48,25 @@ export type FieldData = {
   value?: string;
 };
 
+export interface PriceConfiguration {
+  [key: string]: {
+    priceType: "base" | "additional";
+    availableOptions: string[];
+  };
+}
+
+export interface Attribute {
+  name: string;
+  widgetType: "switch" | "radio";
+  defaultValue: string;
+  availableOptions: string[];
+}
+
 export type Category = {
   _id: string;
   name: string;
+  priceConfiguration: PriceConfiguration;
+  attributes: Attribute[];
 };
 
 export type Product = {

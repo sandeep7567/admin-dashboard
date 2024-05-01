@@ -267,7 +267,7 @@ const Users = () => {
         </Modal>
 
         <Drawer
-          title={"Create user"}
+          title={currentEditUser ? "Edit User" : "Add User"}
           width={720}
           destroyOnClose
           open={isDrawerOpen}
