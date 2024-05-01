@@ -41,3 +41,6 @@ export const deleteTenant = async (tenantId: string) =>
 // Catalog service
 export const getCategories = async () =>
   await api.get(`${CATALOG_SERVICE}/categories`);
+
+export const getProducts = async (queryString: string) =>
+  await api.get(`${CATALOG_SERVICE}/products?${queryString}`);
