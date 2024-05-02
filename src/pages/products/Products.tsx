@@ -102,7 +102,10 @@ const Products = () => {
 
   const { products, isFetching, error, isError } =
     useFetchProducts(queryParams);
-  const { productMutate } = useCreateProduct(form, setIsDrawerOpen);
+  const { productMutate, isProductPending } = useCreateProduct(
+    form,
+    setIsDrawerOpen
+  );
 
   const debounceQUpdate = useMemo(() => {
     return debounce((value: string | undefined) => {
@@ -287,7 +290,12 @@ const Products = () => {
               >
                 Cancel
               </Button>
-              <Button type="primary" onClick={onHandleSubmit}>
+              <Button
+                type="primary"
+                onClick={onHandleSubmit}
+                loading={isProductPending}
+                disabled={isProductPending}
+              >
                 Submit
               </Button>
             </Space>
