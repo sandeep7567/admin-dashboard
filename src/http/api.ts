@@ -44,3 +44,10 @@ export const getCategories = async () =>
 
 export const getProducts = async (queryString: string) =>
   await api.get(`${CATALOG_SERVICE}/products?${queryString}`);
+
+export const createProduct = async (product: FormData) =>
+  await api.post(`${CATALOG_SERVICE}/products`, product, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });

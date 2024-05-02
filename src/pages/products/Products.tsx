@@ -1,7 +1,7 @@
 import {
+  LoadingOutlined,
   PlusOutlined,
   RightOutlined,
-  LoadingOutlined,
 } from "@ant-design/icons";
 import {
   Breadcrumb,
@@ -19,16 +19,23 @@ import {
   theme,
   Typography,
 } from "antd";
-import { Link } from "react-router-dom";
-import { FieldData, Product, QueryParams } from "../../types";
-import ProductsFilter from "./ProductsFilter";
-import { useFetchProducts } from "../../hooks/product/useFetchProducts";
-import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE, ROLES } from "../../constants";
-import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { debounce } from "lodash";
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE, ROLES } from "../../constants";
+import { useCreateProduct } from "../../hooks/product/useCreateProduct";
+import { useFetchProducts } from "../../hooks/product/useFetchProducts";
 import { useAuthStore } from "../../store";
+import {
+  CreateProductData,
+  FieldData,
+  Product,
+  QueryParams,
+} from "../../types";
 import ProductForm from "./forms/ProductForm";
+import makeFormData from "./helper";
+import ProductsFilter from "./ProductsFilter";
 
 const columns: TableProps<Product>["columns"] = [
   {
@@ -95,6 +102,7 @@ const Products = () => {
 
   const { products, isFetching, error, isError } =
     useFetchProducts(queryParams);
+  const { productMutate } = useCreateProduct(form, setIsDrawerOpen);
 
   const debounceQUpdate = useMemo(() => {
     return debounce((value: string | undefined) => {
@@ -129,7 +137,46 @@ const Products = () => {
   } = theme.useToken();
 
   const onHandleSubmit = () => {
-    console.log("submitting...");
+    form.validateFields();
+    const priceConfiguration = form.getFieldValue("priceConfiguration");
+
+    const pricing = Object.entries(priceConfiguration).reduce(
+      (acc, [key, value]) => {
+        const parseKey = JSON.parse(key);
+
+        return {
+          ...acc,
+          [parseKey.configurationKey]: {
+            priceType: parseKey.priceType,
+            availableOptions: value,
+          },
+        };
+      },
+      {}
+    );
+
+    const categoryId = JSON.parse(form.getFieldValue("categoryId"))._id;
+
+    const attributes = Object.entries(form.getFieldValue("attributes")).map(
+      ([key, value]) => {
+        return {
+          name: key,
+          value,
+        };
+      }
+    );
+
+    const postData: CreateProductData = {
+      ...form.getFieldsValue(),
+      image: form.getFieldValue("image"),
+      isPublish: form.getFieldValue("isPublish") ? true : false,
+      categoryId,
+      priceConfiguration: pricing,
+      attributes,
+    };
+
+    const formData = makeFormData(postData);
+    productMutate(formData);
   };
 
   return (
