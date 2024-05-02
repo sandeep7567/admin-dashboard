@@ -28,7 +28,7 @@ const ProductForm = () => {
   const { categories } = useFetchCategories();
   const { tenants } = useFetchTenants(queryParams);
 
-  const selecteCategoryId = Form.useWatch("categoryId");
+  const selecteCategory = Form.useWatch("categoryId");
 
   return (
     <Row>
@@ -168,10 +168,8 @@ const ProductForm = () => {
             </Row>
           </Card>
 
-          {selecteCategoryId && (
-            <Pricing selectedCategory={selecteCategoryId} />
-          )}
-          {selecteCategoryId && <Attributes />}
+          {selecteCategory && <Pricing selectedCategory={selecteCategory} />}
+          {selecteCategory && <Attributes selectedCategory={selecteCategory} />}
 
           <Card title={"Others Properties"}>
             <Row gutter={24}>
