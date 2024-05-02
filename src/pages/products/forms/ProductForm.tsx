@@ -11,14 +11,16 @@ import {
 } from "antd";
 import { useState } from "react";
 import UploadImage from "../../../components/upload/UploadImage";
-import { CURRENT_PAGE, PER_PAGE } from "../../../constants";
+import { CURRENT_PAGE, PER_PAGE, ROLES } from "../../../constants";
 import { useFetchCategories } from "../../../hooks/category/useFetchCategories";
 import { useFetchTenants } from "../../../hooks/tenant/useFetchTenants";
 import { Category, QueryParams, Tenant } from "../../../types";
 import Attributes from "./Attributes";
 import Pricing from "./Pricing";
+import { useAuthStore } from "../../../store";
 
 const ProductForm = () => {
+  const { user } = useAuthStore((state) => state);
   const [queryParams] = useState<QueryParams>({
     currentPage: CURRENT_PAGE,
     perPage: PER_PAGE,
@@ -109,38 +111,40 @@ const ProductForm = () => {
             </Row>
           </Card>
 
-          <Card title={"Tenant Info"}>
-            <Row gutter={24}>
-              <Col span={24}>
-                <Form.Item
-                  label="Restaurant"
-                  name="tenantId"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Restaurant is required",
-                    },
-                  ]}
-                >
-                  <Select
-                    size="large"
-                    style={{ width: "100%" }}
-                    allowClear={true}
-                    placeholder="Select restaurant"
+          {user && user.role !== ROLES.MANAGER && (
+            <Card title={"Tenant Info"}>
+              <Row gutter={24}>
+                <Col span={24}>
+                  <Form.Item
+                    label="Restaurant"
+                    name="tenantId"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Restaurant is required",
+                      },
+                    ]}
                   >
-                    {!!tenants?.data.length &&
-                      tenants?.data.map((tenant: Tenant) => {
-                        return (
-                          <Select.Option value={tenant.id} key={tenant.id}>
-                            {tenant.name}
-                          </Select.Option>
-                        );
-                      })}
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-          </Card>
+                    <Select
+                      size="large"
+                      style={{ width: "100%" }}
+                      allowClear={true}
+                      placeholder="Select restaurant"
+                    >
+                      {!!tenants?.data.length &&
+                        tenants?.data.map((tenant: Tenant) => {
+                          return (
+                            <Select.Option value={tenant.id} key={tenant.id}>
+                              {tenant.name}
+                            </Select.Option>
+                          );
+                        })}
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
+            </Card>
+          )}
 
           {selecteCategory && <Pricing selectedCategory={selecteCategory} />}
           {selecteCategory && <Attributes selectedCategory={selecteCategory} />}

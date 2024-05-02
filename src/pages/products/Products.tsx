@@ -176,6 +176,10 @@ const Products = () => {
       categoryId,
       priceConfiguration: pricing,
       attributes,
+      tenantId:
+        user?.role === ROLES.MANAGER
+          ? user.tenant?.id
+          : form.getFieldValue("tenantId"),
     };
 
     const formData = makeFormData(postData);
