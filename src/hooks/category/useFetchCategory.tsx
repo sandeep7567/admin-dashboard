@@ -10,7 +10,7 @@ export const useFetchCategory = (categoryId: string) => {
     error: categoryError,
     isSuccess: isCategorySuccess,
   } = useQuery<Category>({
-    queryKey: ["category"],
+    queryKey: ["category", categoryId],
     queryFn: async () => {
       return getCategory(categoryId).then((res) => res.data);
     },
