@@ -1,14 +1,13 @@
 import { Card, Col, Form, Radio, Row, Switch, Typography } from "antd";
-import { Attribute, Category } from "../../../types";
+import { useFetchCategory } from "../../../hooks/category/useFetchCategory";
+import { Attribute } from "../../../types";
 
 type PricingProps = {
   selectedCategory: string;
 };
 
 const Attributes = ({ selectedCategory }: PricingProps) => {
-  const category: Category = selectedCategory
-    ? JSON.parse(selectedCategory)
-    : null;
+  const { category } = useFetchCategory(selectedCategory);
 
   if (!category) {
     return null;

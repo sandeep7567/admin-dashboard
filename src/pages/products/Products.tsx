@@ -21,7 +21,7 @@ import {
 } from "antd";
 import { format } from "date-fns";
 import { debounce } from "lodash";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE, ROLES } from "../../constants";
 import { useCreateProduct } from "../../hooks/product/useCreateProduct";
@@ -92,6 +92,8 @@ const Products = () => {
   const [form] = Form.useForm();
   const [filterForm] = Form.useForm();
 
+  const [currentEditingProduct, setCurrentEditingProduct] =
+    useState<null | Product>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [queryParams, setQueryParams] = useState<QueryParams>({
     currentPage: CURRENT_PAGE,
@@ -106,6 +108,43 @@ const Products = () => {
     form,
     setIsDrawerOpen
   );
+
+  useEffect(() => {
+    if (currentEditingProduct) {
+      setIsDrawerOpen(true);
+
+      const priceConfiguration = Object.entries(
+        currentEditingProduct.priceConfiguration
+      ).reduce((acc, [key, value]) => {
+        const stringifiedKey = JSON.stringify({
+          configurationKey: key,
+          priceType: value.priceType,
+        });
+
+        return {
+          ...acc,
+          [stringifiedKey]: value.availableOptions,
+        };
+      }, {});
+
+      const attributes = currentEditingProduct.attributes.reduce(
+        (acc, item) => {
+          return {
+            ...acc,
+            [item.name]: item.value,
+          };
+        },
+        {}
+      );
+
+      form.setFieldsValue({
+        ...currentEditingProduct,
+        priceConfiguration,
+        attributes,
+        categoryId: currentEditingProduct.category._id,
+      });
+    }
+  }, [currentEditingProduct, form]);
 
   const debounceQUpdate = useMemo(() => {
     return debounce((value: string | undefined) => {
@@ -158,7 +197,7 @@ const Products = () => {
       {}
     );
 
-    const categoryId = JSON.parse(form.getFieldValue("categoryId"))._id;
+    const categoryId = form.getFieldValue("categoryId");
 
     const attributes = Object.entries(form.getFieldValue("attributes")).map(
       ([key, value]) => {
@@ -228,10 +267,15 @@ const Products = () => {
               dataIndex: "action",
               key: "action",
 
-              render: () => {
+              render: (_, record: Product) => {
                 return (
                   <Space>
-                    <Button type="link" onClick={() => {}}>
+                    <Button
+                      type="link"
+                      onClick={() => {
+                        setCurrentEditingProduct(record);
+                      }}
+                    >
                       Edit
                     </Button>
                     <Button type="link" onClick={() => {}}>
@@ -280,6 +324,7 @@ const Products = () => {
           destroyOnClose
           open={isDrawerOpen}
           onClose={() => {
+            setCurrentEditingProduct(null);
             form.resetFields();
             setIsDrawerOpen(false);
           }}
@@ -288,6 +333,7 @@ const Products = () => {
             <Space>
               <Button
                 onClick={() => {
+                  setCurrentEditingProduct(null);
                   form.resetFields();
                   setIsDrawerOpen(false);
                 }}

@@ -69,12 +69,19 @@ export type Category = {
   attributes: Attribute[];
 };
 
+export type ProductAttribute = {
+  name: string;
+  value: string | boolean;
+};
+
 export type Product = {
   _id: string;
   name: string;
   description: string;
   isPublish: boolean;
   image: string;
+  priceConfiguration: PriceConfiguration;
+  attributes: ProductAttribute[];
   category: Category;
   createdAt: string;
 };

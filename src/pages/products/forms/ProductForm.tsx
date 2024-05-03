@@ -14,10 +14,10 @@ import UploadImage from "../../../components/upload/UploadImage";
 import { CURRENT_PAGE, PER_PAGE, ROLES } from "../../../constants";
 import { useFetchCategories } from "../../../hooks/category/useFetchCategories";
 import { useFetchTenants } from "../../../hooks/tenant/useFetchTenants";
+import { useAuthStore } from "../../../store";
 import { Category, QueryParams, Tenant } from "../../../types";
 import Attributes from "./Attributes";
 import Pricing from "./Pricing";
-import { useAuthStore } from "../../../store";
 
 const ProductForm = () => {
   const { user } = useAuthStore((state) => state);
@@ -67,12 +67,9 @@ const ProductForm = () => {
                     allowClear={true}
                     placeholder="Role is required"
                   >
-                    {categories.map((catgory: Category) => {
+                    {categories?.map((catgory: Category) => {
                       return (
-                        <Select.Option
-                          value={JSON.stringify(catgory)}
-                          key={catgory._id}
-                        >
+                        <Select.Option value={catgory._id} key={catgory._id}>
                           {catgory.name}
                         </Select.Option>
                       );
@@ -134,7 +131,10 @@ const ProductForm = () => {
                       {!!tenants?.data.length &&
                         tenants?.data.map((tenant: Tenant) => {
                           return (
-                            <Select.Option value={tenant.id} key={tenant.id}>
+                            <Select.Option
+                              value={String(tenant.id)}
+                              key={tenant.id}
+                            >
                               {tenant.name}
                             </Select.Option>
                           );

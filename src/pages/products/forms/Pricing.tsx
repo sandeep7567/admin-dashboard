@@ -1,18 +1,14 @@
 import { Card, Col, Form, InputNumber, Row, Space, Typography } from "antd";
-import { Category } from "../../../types";
+import { useFetchCategory } from "../../../hooks/category/useFetchCategory";
 
 type PricingProps = {
   selectedCategory: string;
 };
 
 const Pricing = ({ selectedCategory }: PricingProps) => {
-  const category: Category | null = selectedCategory
-    ? JSON.parse(selectedCategory)
-    : null;
+  const { category } = useFetchCategory(selectedCategory);
 
-  if (!category) {
-    return null;
-  }
+  if (!category) return null;
 
   return (
     <Card

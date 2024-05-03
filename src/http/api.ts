@@ -51,3 +51,6 @@ export const createProduct = async (product: FormData) =>
       "Content-Type": "multipart/form-data",
     },
   });
+
+export const getCategory = async (categoryId: string) =>
+  await api.get(`${CATALOG_SERVICE}/categories/${categoryId}`);
