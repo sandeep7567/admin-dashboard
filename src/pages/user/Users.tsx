@@ -19,8 +19,8 @@ import {
 } from "antd";
 import { debounce } from "lodash";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE } from "../../constants";
+import { Link, Navigate } from "react-router-dom";
+import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE, ROLES } from "../../constants";
 import { useCreateUser } from "../../hooks/user/useCreateUser";
 import { useDeleteUser } from "../../hooks/user/useDeleteUser";
 import { useFetchUsers } from "../../hooks/user/useFetchUsers";
@@ -72,7 +72,7 @@ const Users = () => {
   const [form] = Form.useForm();
   const [filterForm] = Form.useForm();
 
-  const { user } = useAuthStore();
+  const { user } = useAuthStore((state) => state);
 
   const {
     token: { colorBgLayout },
@@ -150,6 +150,10 @@ const Users = () => {
 
     setCurrentUserDeleteId(null);
   };
+
+  if (user?.role !== ROLES.ADMIN) {
+    return <Navigate to={"/"} replace />;
+  }
 
   return (
     <>

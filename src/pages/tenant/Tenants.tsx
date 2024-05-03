@@ -13,13 +13,13 @@ import {
   theme,
   Typography,
 } from "antd";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { FieldData, QueryParams, Tenant } from "../../types";
 
 import { PlusOutlined } from "@ant-design/icons";
 import { debounce } from "lodash";
 import { useEffect, useMemo, useState } from "react";
-import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE } from "../../constants";
+import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE, ROLES } from "../../constants";
 
 import { useCreateTenant } from "../../hooks/tenant/useCreateTenant";
 import useDeletTenant from "../../hooks/tenant/useDeletTenant";
@@ -27,6 +27,7 @@ import { useFetchTenants } from "../../hooks/tenant/useFetchTenants";
 import { useUpdateTenant } from "../../hooks/tenant/useUpdateTenant";
 import TenantsFilter from "./TenantsFilter";
 import TenantForm from "./forms/TenantForm";
+import { useAuthStore } from "../../store";
 
 const columns: TableProps<Tenant>["columns"] = [
   {
@@ -47,6 +48,8 @@ const columns: TableProps<Tenant>["columns"] = [
 ];
 
 const Tenants = () => {
+  const { user } = useAuthStore((state) => state);
+
   const [form] = Form.useForm();
   const [filterForm] = Form.useForm();
 
@@ -126,6 +129,10 @@ const Tenants = () => {
 
     setCurrentTenantDeleteId(null);
   };
+
+  if (user?.role !== ROLES.ADMIN) {
+    return <Navigate to={"/"} replace />;
+  }
 
   return (
     <>
