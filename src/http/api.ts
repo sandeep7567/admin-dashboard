@@ -54,3 +54,8 @@ export const createProduct = async (product: FormData) =>
 
 export const getCategory = async (categoryId: string) =>
   await api.get(`${CATALOG_SERVICE}/categories/${categoryId}`);
+
+export const updateProduct = async (product: FormData, productId: string) =>
+  await api.put(`${CATALOG_SERVICE}/products/${productId}`, product, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });

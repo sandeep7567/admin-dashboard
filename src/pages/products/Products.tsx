@@ -24,8 +24,8 @@ import { debounce } from "lodash";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { CURRENT_PAGE, DEBOUNCE_TIMER, PER_PAGE, ROLES } from "../../constants";
-import { useCreateProduct } from "../../hooks/product/useCreateProduct";
 import { useFetchProducts } from "../../hooks/product/useFetchProducts";
+import { useProductMutate } from "../../hooks/product/useProductMutate";
 import { useAuthStore } from "../../store";
 import {
   CreateProductData,
@@ -104,8 +104,9 @@ const Products = () => {
 
   const { products, isFetching, error, isError } =
     useFetchProducts(queryParams);
-  const { productMutate, isProductPending } = useCreateProduct(
+  const { productMutate, isProductPending } = useProductMutate(
     form,
+    currentEditingProduct,
     setIsDrawerOpen
   );
 
@@ -319,7 +320,7 @@ const Products = () => {
         </Modal>
 
         <Drawer
-          title={"Add Product"}
+          title={currentEditingProduct ? "Update Product" : "Add Product"}
           width={720}
           destroyOnClose
           open={isDrawerOpen}
