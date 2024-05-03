@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Form, message, Space, Typography, Upload, UploadProps } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 
-const UploadImage = () => {
+const UploadImage = ({ initialImage }: { initialImage: string }) => {
   const [messageApi, contextHolder] = message.useMessage();
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(initialImage);
 
   const uploadConfig: UploadProps = {
     name: "file",
@@ -25,6 +25,7 @@ const UploadImage = () => {
       return false;
     },
   };
+
   return (
     <Form.Item
       label="Image"

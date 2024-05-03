@@ -2,6 +2,7 @@ import {
   Card,
   Col,
   Form,
+  FormInstance,
   Input,
   Row,
   Select,
@@ -19,7 +20,7 @@ import { Category, QueryParams, Tenant } from "../../../types";
 import Attributes from "./Attributes";
 import Pricing from "./Pricing";
 
-const ProductForm = () => {
+const ProductForm = ({ form }: { form: FormInstance }) => {
   const { user } = useAuthStore((state) => state);
   const [queryParams] = useState<QueryParams>({
     currentPage: CURRENT_PAGE,
@@ -103,7 +104,7 @@ const ProductForm = () => {
           <Card title={"Product image"} bordered={false}>
             <Row gutter={20}>
               <Col span={12}>
-                <UploadImage />
+                <UploadImage initialImage={form.getFieldValue("image")} />
               </Col>
             </Row>
           </Card>
