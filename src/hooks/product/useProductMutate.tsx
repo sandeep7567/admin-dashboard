@@ -10,7 +10,12 @@ export const useProductMutate = (
 ) => {
   const queryClient = useQueryClient();
 
-  const { mutate: productMutate, isPending: isProductPending } = useMutation({
+  const {
+    mutate: productMutate,
+    isPending: isProductPending,
+    error: productError,
+    isError: isProductError,
+  } = useMutation({
     mutationKey: ["product"],
 
     mutationFn: async (data: FormData) => {
@@ -33,5 +38,5 @@ export const useProductMutate = (
     },
   });
 
-  return { productMutate, isProductPending };
+  return { productMutate, isProductPending, productError, isProductError };
 };

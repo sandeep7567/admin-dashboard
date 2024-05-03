@@ -4,6 +4,7 @@ import {
   RightOutlined,
 } from "@ant-design/icons";
 import {
+  Alert,
   Breadcrumb,
   Button,
   Drawer,
@@ -104,11 +105,8 @@ const Products = () => {
 
   const { products, isFetching, error, isError } =
     useFetchProducts(queryParams);
-  const { productMutate, isProductPending } = useProductMutate(
-    form,
-    currentEditingProduct,
-    setIsDrawerOpen
-  );
+  const { productMutate, isProductPending, productError, isProductError } =
+    useProductMutate(form, currentEditingProduct, setIsDrawerOpen);
 
   useEffect(() => {
     if (currentEditingProduct) {
@@ -332,6 +330,9 @@ const Products = () => {
           styles={{ body: { backgroundColor: colorBgLayout } }}
           extra={
             <Space>
+              {isProductError && (
+                <Alert message={productError?.message} type="error" />
+              )}
               <Button
                 onClick={() => {
                   setCurrentEditingProduct(null);
