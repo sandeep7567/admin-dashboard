@@ -48,7 +48,7 @@ const Attributes = ({ selectedCategory }: PricingProps) => {
               <Row gutter={[20, 20]}>
                 <Col>
                   <Form.Item
-                    name={["attribute", attribute.name]}
+                    name={["attributes", attribute.name]}
                     valuePropName="checked"
                     initialValue={attribute.defaultValue}
                     label={attribute.name}
