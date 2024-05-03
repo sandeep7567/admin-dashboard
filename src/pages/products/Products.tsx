@@ -92,7 +92,7 @@ const Products = () => {
   const [form] = Form.useForm();
   const [filterForm] = Form.useForm();
 
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [queryParams, setQueryParams] = useState<QueryParams>({
     currentPage: CURRENT_PAGE,
     perPage: PER_PAGE,
